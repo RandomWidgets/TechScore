@@ -1,0 +1,85 @@
+
+This page describes TechScore, the Java-based Regatta Scoring program
+with Rotations, RP Forms, Breakdowns and Penalties, and scoring as per
+Intercollegiate Sailing Association (ICSA) procedural rules.
+
+* TechScore                                    - Written by Dayan Paez
+
+This document describes the structure of the program for
+developers. If you want to install, read the file `INSTALL'.
+
+* License
+
+TechScore is free software: you can redistribute it and/or modify it
+under the terms of the GNU General Public License as published by the
+Free Software Foundation, either version 3 of the License, or (at your
+option) any later version.
+
+TechScore is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with TechScore.  If not, see <http://www.gnu.org/licenses/>.
+
+* Outline
+
+ 1. Structure of source
+ 2. Notes for extending code
+
+
+* Structure of source
+
+The program consists of four packages:
+
+| Dir.    | Description                                  |
+|---------+----------------------------------------------|
+| dpxml   | XML Library                                  |
+| regatta | Library of sailing regatta tools             |
+| tscore  | The MAIN package with all the GUI tools      |
+| nscore  | A set of compatibility tools for NavyScoring |
+
+The main executable is TScoreGUI.java, found in the folder "tscore".
+
+** How the GUI is organized
+
+In keeping with the methodology employed in developing the online
+version of TechScore, each editing action to be done on a regatta,
+such as Team names, Rotations, Finishes, etc, occur on a different
+Editing Pane. TScoreGUI manages all the editing panes that have been
+registered with it. When the user chooses a pane to use, TScoreGUI
+makes that pane its content. All subsequent actions within the pane
+are controlled by the pane object itself, and not by TScoreGUI. Thus,
+TScoreGUI acts as a GUI manager, and each pane itself is responsible
+for appropriately editing the same regatta object.
+
+Because all the editing panes need to work on the same regatta, each
+one requires a regatta object associated with it at instantiation
+time. All editing panes must subclass the /AbstractPane/ class, which
+handles listening to regatta changes and also provides basic methods
+for TScoreGUI to check if the pane should be enabled or not (for
+instance, the Rotations pane is enabled if there are more than one
+race and two teams in the regatta).
+
+** Creating a new editing pane
+
+To create a new editing pane, first look at the template of an
+already-existing pane such as the /DetailsPane/ or the
+/PenaltiesPane/, and replace the values appropriately. In particular,
+all panes must include
+
+  - *fill* command (which draws the pane)
+
+  - *isUsable* method which returns whether or not the pane should be
+    enabled for use or not by the GUI manager
+
+This should be all. If the pane edits a regatta by using one of
+/Regatta/'s methods, regatta change events are fired automatically,
+and TScoreGUI will react accordingly. If the changes happen on an
+object already registered with regatta (such as /RP/), a regatta
+change event must be fired manually to notify the regatta
+listeners. In particular, TScoreGUI needs to know of any major changes
+so that it can (a) mark the regatta as unsaved, and (b),
+disable/enable the appropriate editing panes.
+

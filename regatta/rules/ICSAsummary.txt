@@ -1,0 +1,70 @@
+* Definitions
+
+The following conventions are used.
+
+fleet
+    The number of teams participating in a regatta 
+
+finish
+    The order in which a boat crosses the finish line, or the
+    appropriate label if otherwise (DNS, DNF, BYE).
+    
+score
+    The number of points received by a team in a specific race in a
+    given division
+    
+penalty
+    A disqualification (DSQ), retire after finish (RAF), or ``on
+    course side after start'' (OCS) penalty.
+    
+breakdown
+    A handicap granted by the race committee of the regatta due to
+    boat failure or other circumstance outside of the sailor's control
+
+Generally, a regatta consists of multiple divisions. The net results
+are based on the sum of the individual scores within each
+division. For the purposes of this discussion, only one division is
+treated.
+
+
+* Penalized teams
+
+For penalized teams (DSQ, OCS, RAF), the score is Fleet + 1. Their
+finish does not bear on the other sailor's scores.
+
+
+* Regular finishes
+
+For non-penalized teams, the score in a given race in a given division
+is an integer value given by their place crossing the finish line,
+UNLESS
+
+    - a breakdown is assigned in the form of a score, in which case
+      the score is as assigned,
+      
+    - a breakdown is assigned in the form of an average, in which case
+      the score for that race is given by the average of that team's
+      score across all the races--both before and after--in that same
+      division, rounded to the nearest integer, and updated
+      retro-actively as the regatta progresses, unless
+      
+          - said average is no better than the actual score would be
+            without the breakdown,
+	    
+          - there are no other races in that division to average
+	  
+      in which case the score remains (temporarily) as if there were no breakdown.
+
+
+* Special finishes
+
+For teams that do not cross the finish line because they did not start
+(DNS) or did not finish (DNF), the score is Fleet + 1.
+
+For teams that do not cross the finish line because of a bye (BYE),
+the score is the average of the scores in the other races--both before
+and after--in that division, rounded to the nearest integer, and
+updated retro-actively, unless,
+
+    - There are no other scores to average, in which case the score is
+      (temporarily) Fleet.

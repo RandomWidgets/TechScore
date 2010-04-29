@@ -1,0 +1,110 @@
+/* Layout for TechScore reports */
+/* Created by Dayan Paez */
+
+/* General properties */
+
+/* Tables */
+table {
+    padding: 0.5em;
+    font-family: monospace;
+    width: 100%;
+    }
+
+tr.totalrow {
+    background: #DDDDDD;
+    border-bottom: 1px solid #BBBBBB;
+}
+tr.totalrow td {
+    vertical-align: top;
+}
+
+tr.row0 {
+    background: white;
+}
+tr.row1 {
+    background: #EEEEEE;
+}
+
+tr.skipper td {
+    background: #EEEEEE;
+}
+
+td.namescell {
+    max-width: 20em;
+}
+
+th {
+    background: #DDDDDD;
+    color: #993333;
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
+    vertical-align: bottom;
+    padding-right: 0.5em;
+    min-width: 2em;
+    }
+
+td {
+    generic-family: monospace;
+    width: 2.2em;
+    vertical-align: top;
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
+    padding-right: 0.5em;
+    }
+
+thead {
+    border-bottom: 2px solid #DDDDDD;
+}
+
+col#teamcol {
+    border-right: 1px solid #DDDDDD;
+    text-align: left;
+}
+
+col#totalcol {
+    border-left: 1px solid #DDDDDD;
+}
+
+/* Races participated */
+.races {
+    width: 5em;
+    color: #666666;
+    font-size: 0.9em;
+    vertical-align: bottom;
+}
+
+
+/* Classes */
+.hidden {
+    display: none;
+    }
+
+.sum {
+    font-weight: normal;
+}
+
+.total {
+    background: #CCCCCC;
+    font-weight: bold;
+}
+
+.left {
+    text-align: left;
+}
+
+.inline {
+    display: inline;
+}
+
+.strong {
+    font-weight: bold;
+}
+
+.large {
+    font-size: 120%;
+    font-weight: bold;
+}
+
+.help {
+    font-size: 80%;
+}
