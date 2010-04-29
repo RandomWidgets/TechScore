@@ -114,7 +114,7 @@ public class RacesPane extends AbstractPane
 
     label = Factory.label("# of Divisions:");
     SpinnerNumberModel sm =
-      new SpinnerNumberModel(regatta.getNumDivisions(), 1, 4, 1);
+      new SpinnerNumberModel(regatta.getNumDivisions(), 1, Division.values().length, 1);
     sm.addChangeListener(this);
     divSpinner = new TSpinner(sm);
     divPanel.add(label, c1);

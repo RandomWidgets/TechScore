@@ -345,7 +345,7 @@ public class RotationsPane extends AbstractPane
       Map<Sail, Team> sailMap = new TreeMap<Sail, Team>();
       Team [] teams = regatta.getTeams();
       for (int i = 0; i < sails.size(); i++) {
-	Sail sail = new Sail(sails.get(i).getNumber().intValue());
+	Sail sail = new Sail(String.valueOf(sails.get(i).getValue()));
 	Team team = teams[i];
 	if (sailMap.put(sail, team) != null) {
 	  // Repeated sails

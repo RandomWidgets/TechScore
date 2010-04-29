@@ -134,7 +134,7 @@ public class NavyScoreLoader {
 	  reg.setFinish(finish);
 
 	  // rotation
-	  Sail sail = new Sail(Integer.valueOf(readStr(into, 8).trim()));
+	  Sail sail = new Sail(readStr(into, 8).trim());
 	  rot.setSail(race, team, sail);
 	}
 	consume(into);

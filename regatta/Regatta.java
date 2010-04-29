@@ -45,7 +45,7 @@ public class Regatta {
       return this.name;
     }
   };
-  public static enum Division {A, B, C, D};
+  public static enum Division {A, B, C, D, E};
   
   // Private variables
   private String name, boat, blurb;
