@@ -51,7 +51,7 @@ public class RotationFactory {
   protected Regatta regatta;
   protected RotationType rotType;
   protected RotationStyle rotStyle;
-  protected int [] sailInts;
+  protected Sail [] sailInts;
   protected int setSize, actualSetSize;
   protected ArrayList<Race> orderedRaces;
   protected ArrayList<Team> teams;
@@ -62,14 +62,14 @@ public class RotationFactory {
    *
    * @param reg a <code>Regatta</code> value
    * @param type a <code>RotationType</code> value
-   * @param sails an <code>ArrayList<Integer></code> of sail numbers
+   * @param sails an <code>Sail []</code> of sail numbers
    * to use
    * @param set the number of races per set
    */
   public RotationFactory(Regatta reg,
 			 RotationType type,
 			 RotationStyle style,
-			 int [] sails,
+			 Sail [] sails,
 			 int set) {
     this.regatta  = reg;
     this.rotType  = type;
@@ -193,22 +193,12 @@ public class RotationFactory {
     Team [] teamList = this.regatta.getTeams();
     TreeMap<Sail, Team> teamMap = new TreeMap<Sail, Team>();
     for (int i = 0; i < this.sailInts.length; i++) {
-      if (teamMap.put(new Sail(sailInts[i]), teamList[i]) != null) {
+      if (teamMap.put(new Sail(sailInts[i].getSail()), teamList[i]) != null) {
 	throw new IllegalArgumentException("Non-unique sail(s)");
       }
     }
     sails = new ArrayList<Sail>(teamMap.keySet());
     teams = new ArrayList<Team>(teamMap.values());
-
-  }
-
-  public static void main (String [] args) {
-    ArrayList<Sail> list = new ArrayList<Sail>(Arrays.asList(new Sail[]{new Sail(1),
-									new Sail(2),
-									new Sail(3),
-									new Sail(4),
-									new Sail(5),
-									new Sail(6)}));
 
   }
 }

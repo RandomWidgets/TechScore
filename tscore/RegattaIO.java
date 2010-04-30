@@ -1000,7 +1000,7 @@ public class RegattaIO {
 	    }
 	    Team t = this.teamList.get(index);
 
-	    Sail s = new Sail(Integer.parseInt(sid));
+	    Sail s = new Sail(String.valueOf(sid));
 	    // race
 	    int length = rid.length();
 	    int raceNum = Integer.parseInt(rid.substring(0, length - 1));
@@ -1642,15 +1642,15 @@ public class RegattaIO {
 			  RotationStyle.NAVY,
 			  new Race [][]{reg.getRaces()},
 			  reg.getTeams(),
-			  new Sail[]{new Sail(21),
-				     new Sail(22),
-				     new Sail(23),
-				     new Sail(24),
-				     new Sail(25),
-				     new Sail(26),
-				     new Sail(27),
-				     new Sail(28),
-				     new Sail(29)},
+			  new Sail[]{new Sail("21"),
+				     new Sail("22"),
+				     new Sail("23"),
+				     new Sail("24"),
+				     new Sail("25"),
+				     new Sail("26"),
+				     new Sail("27"),
+				     new Sail("28"),
+				     new Sail("29")},
 			  2);
 	  reg.setRotation(rot);
 	} catch (RotationBuilderException e) {

@@ -224,40 +224,4 @@ public class Rotation {
       System.out.println();
     }
   }
-
-  public static void main (String [] args) {
-    Rotation rot = new Rotation();
-    Race [] races = {new Race(Division.A, 1),
-		     new Race(Division.A, 2),
-		     new Race(Division.A, 3),
-		     new Race(Division.B, 1),
-		     new Race(Division.B, 2),
-		     new Race(Division.C, 3)};
-    Team [] teams = {new Team("A"), new Team("B"),
-		     new Team("C"), new Team("D"),
-		     new Team("E"), new Team("F")};
-
-    rot.setSail(races[0], teams[0], new Sail(1));
-    rot.setSail(races[0], teams[1], new Sail(2));
-    rot.setSail(races[1], teams[2], new Sail(3));
-    rot.setSail(races[1], teams[3], new Sail(4));
-    rot.setSail(races[1], teams[0], new Sail(5));
-    rot.setSail(races[2], teams[0], new Sail(6));
-    rot.setSail(races[0], teams[2], new Sail(3));
-    rot.setSail(races[0], teams[3], new Sail(4));
-    rot.dump();
-
-    System.out.println("Removing team " + teams[1]);
-    rot.removeTeam(teams[1]);
-    rot.dump();
-
-    System.out.println("Problematic races:");
-    for (Race race : rot.normalize()) {
-      System.out.print(race + " ");
-      rot.removeRace(race);
-    }
-    System.out.println();
-
-    rot.dump();
-  }
 }

@@ -15,7 +15,7 @@ VERSION = 1.3.5
 # include dpxml/Makefile regatta/Makefile tscore/Makefile
 default:
 	$(MAKE) $(MAKEFLAGS) -C dpxml  && $(MAKE) $(MAKEFLAGS) -C regatta && \
-	$(MAKE) $(MAKEFLAGS) -C nscore && &(MAKE) $(MAKEFLAGS) -C tscore
+	$(MAKE) $(MAKEFLAGS) -C nscore && $(MAKE) $(MAKEFLAGS) -C tscore
 jar:
 	jar cfev tscore-$(VERSION).jar tscore.TScoreGUI \
 	tscore/*.class dpxml/*.class regatta/*.class tscore/img tscore/inc \

@@ -201,7 +201,8 @@ public class TweakRotationsPane extends AbstractPane {
 	      for (Integer i : raceField.getNumbers()) {
 		Race race = regatta.getRace((Division)d, i);
 		Sail [] sails = rot.getSails(race);
-		if (Collections.min(Arrays.asList(sails)).getSail() + amount <= 0) {
+		int intValue = Integer.valueOf(Collections.min(Arrays.asList(sails)).getSail());
+		if (intValue + amount <= 0) {
 		  List<Race> list = problemRaces.get((Division)d);
 		  if (list == null) {
 		    list = new ArrayList<Race>(1);
@@ -211,7 +212,7 @@ public class TweakRotationsPane extends AbstractPane {
 		}
 		else {
 		  for (Sail s : sails) {
-		    s.setSail(s.getSail() + amount);
+		    s.setSail(String.valueOf(Integer.valueOf(s.getSail()) + amount));
 		  }
 		}
 	      }
@@ -246,8 +247,8 @@ public class TweakRotationsPane extends AbstractPane {
       button = new JButton(new AbstractAction("Replace sail") {
 	  public void actionPerformed(ActionEvent e) {
 	    // Get old and new sails
-	    int oldSailNum = ((Sail)sailField.getSelectedItem()).getSail();
-	    int newSailNum = newSailField.getNumber().intValue();
+	    String oldSailNum = ((Sail)sailField.getSelectedItem()).getSail();
+	    String newSailNum = String.valueOf(newSailField.getNumber());
 
 	    // Get the races
 	    Rotation rot = regatta.getRotation();
@@ -289,12 +290,13 @@ public class TweakRotationsPane extends AbstractPane {
       //- Replacement
       p1.gridy++; p2.gridy++;
       label = Factory.label("With new sail:");
+      int nextSail = Integer.valueOf(Collections.max(Arrays.asList(curSails)).getSail());
       this.newSailField =
-	new SpinnerNumberModel(Collections.max(Arrays.asList(curSails)).getSail() + 1,
+	new SpinnerNumberModel(nextSail + 1,
 			       1, null, 1);
       this.newSailField.addChangeListener(new ChangeListener() {
 	  public void stateChanged(ChangeEvent e) {
-	    Sail newSail = new Sail(newSailField.getNumber().intValue());
+	    Sail newSail = new Sail(String.valueOf(newSailField.getNumber()));
 	    button.setEnabled(!Arrays.asList(curSails).contains(newSail));
 	  }
 	});
