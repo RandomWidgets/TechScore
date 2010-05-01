@@ -33,6 +33,9 @@ import javax.swing.event.DocumentEvent;
 import java.awt.event.ActionListener;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
+import org.sourceforge.jcalendarbutton.JCalendarButton;
+import org.sourceforge.jcalendarbutton.JTimeButton;
+import regatta.Regatta.RegattaScoring;
 
 /**
  * The main pane for editing regatta, this pane contains the details
@@ -71,7 +74,7 @@ public class DetailsPane
   private JCalendarButton dateButton;
   private JTimeButton timeButton;
   private SpinnerNumberModel durationModel;
-  private JComboBox typeField;
+  private JComboBox typeField, scoringField;
   private JTextArea blurbField;
 
   /**
@@ -220,6 +223,22 @@ public class DetailsPane
       });
     this.add(label, c1);
     this.add(typeField, c2);
+
+    //- Scoring
+    //- Type
+    c1.gridy++; c2.gridy++; c3.gridy++;
+    c2.weightx = 1.0;
+    c2.gridwidth = 2;
+    label = Factory.label("Scoring:");
+    scoringField = new JComboBox(RegattaScoring.values());
+    scoringField.setSelectedItem(regatta.getType());
+    scoringField.addActionListener(new ActionListener() {
+	public void actionPerformed(ActionEvent evt) {
+	  regatta.setScoring((RegattaScoring)scoringField.getSelectedItem());
+	}
+      });
+    this.add(label, c1);
+    this.add(scoringField, c2);
 
     //- Summary
     c1.gridy++; c2.gridy++; c3.gridy++;

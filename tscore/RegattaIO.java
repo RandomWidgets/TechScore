@@ -60,6 +60,7 @@ import java.util.HashMap;
 import java.util.Map;
 import regatta.TeamPenalty;
 import regatta.TeamPenalty.TeamPenaltyType;
+import regatta.Regatta.RegattaScoring;
 
 /**
  * Manages a regatta connection to a file. When the regatta is loaded,
@@ -207,6 +208,11 @@ public class RegattaIO {
       // Type
       textString = String.valueOf(this.regatta.getType());
       tag = getOrCreateElement(doc, rootElement, "RegattaType");
+      this.replaceElementContent(tag, doc.createTextNode(textString));
+
+      // Scoring
+      textString = String.valueOf(this.regatta.getScoring());
+      tag = getOrCreateElement(doc, rootElement, "RegattaScoring");
       this.replaceElementContent(tag, doc.createTextNode(textString));
 
       // Blurb
@@ -599,6 +605,11 @@ public class RegattaIO {
       tag.addAttr("class", "ICSA");
       root.add(tag);
 
+      tag = new XMLTag("RegattaScoring");
+      tag.add(new XMLTextTag(this.regatta.getScoring().toString()));
+      tag.addAttr("class", "ICSA");
+      root.add(tag);
+
       tag = new XMLTag("Blurb");
       String cont = this.regatta.getBlurb();
       if (cont == null) {
@@ -912,14 +923,34 @@ public class RegattaIO {
 	warnings.add("Regatta type not found, using \"Personal\"");
 	theType = RegattaType.PERSONAL;
       }
-      for (RegattaType legalType: RegattaType.values()) {
-	if (type.equalsIgnoreCase(legalType.toString())) {
-	  theType = legalType;
+      else {
+	for (RegattaType legalType: RegattaType.values()) {
+	  if (type.equalsIgnoreCase(legalType.toString())) {
+	    theType = legalType;
+	  }
+	}
+	if (theType == null) {
+	  warnings.add("Invalid regatta type, using \"Personal\"");
+	  theType = RegattaType.PERSONAL;
 	}
       }
-      if (theType == null) {
-	warnings.add("Invalid regatta type, using \"Personal\"");
-	theType = RegattaType.PERSONAL;
+
+      // Scoring
+      String scoring = getTagContent (root, "RegattaScoring");
+      RegattaScoring theScoring = null;
+      if (type == null) {
+	warnings.add ("Regatta scoring not found, using \"Standard\"");
+	theScoring = RegattaScoring.STANDARD;
+      }
+      else {
+	for (RegattaScoring legalScoring: RegattaScoring.values ()) {
+	  if (scoring.equalsIgnoreCase (legalScoring.toString ()))
+	    theScoring = legalScoring;
+	}
+	if (theScoring == null) {
+	  warnings.add ("Invalid regatta scoring, using \"Standard\"");
+	  theScoring = RegattaScoring.STANDARD;
+	}
       }
 
       // Blurb
