@@ -32,6 +32,18 @@ import java.util.Collections;
  */
 public class Regatta {
   // Public variables
+  public static enum RegattaScoring {
+    STANDARD ("Standard"),
+      COMBINED ("Combined divisions");
+    private String name;
+    RegattaScoring (String n) {
+      this.name = n;
+    }
+    public String toString () {
+      return this.name;
+    }
+  }
+
   public static enum RegattaType {
     PERSONAL("Personal"),
       CONFERENCE("Conference"),
@@ -53,6 +65,7 @@ public class Regatta {
   // Private variables
   private String name, boat, blurb;
   private RegattaType type;
+  private RegattaScoring scoring;
   private Date starttime;
   private int duration; // days
   private ArrayList<RegattaListener> regattaListeners;
@@ -119,6 +132,22 @@ public class Regatta {
    * @return a <code>RegattaType</code> value
    */
   public RegattaType getType() {return this.type; }
+
+  /**
+   * Sets the scoring rules
+   *
+   * @param t the scoring rules to use
+   */
+  public void setScoring (RegattaScoring t) {
+    this.scoring = t;
+    this.fireRegattaChange (RegattaEventType.DETAILS);
+  }
+  /**
+   * Fetches the scoring rules in use
+   *
+   * @return the scoring rule
+   */
+  public RegattaScoring getScoring () {return this.scoring;}
 
   /**
    * Describe <code>setName</code> method here.
