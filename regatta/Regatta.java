@@ -92,6 +92,7 @@ public class Regatta {
     this.setDuration(1);
     this.setStartTime(getNextWeekend());
     this.setType(RegattaType.PERSONAL);
+    this.setScoring(RegattaScoring.STANDARD);
     this.teamPenaltyMap =
       new TreeMap<Division, Map<Team, TeamPenalty>>();
 

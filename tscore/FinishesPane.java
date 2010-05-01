@@ -45,6 +45,9 @@ import regatta.RegattaEvent.RegattaEventType;
 import regatta.Rotation;
 import regatta.Sail;
 import regatta.Team;
+import tscore.FinishesPane.Using;
+import regatta.Regatta.RegattaScoring;
+import tscore.RaceSpinnerModel.RaceComparator;
 
 /**
  * Pane for entering finishes. This pane is organized in two main
@@ -158,8 +161,8 @@ public class FinishesPane extends AbstractPane
     //  -Race
     Race chosenRace = this.getNextUnscoredRace();
     label = Factory.label("Race:");
-    this.raceSpinnerModel = new RaceSpinnerModel(regatta.getRaces());
-    this.raceSpinnerModel.setValue(chosenRace);
+    this.raceSpinnerModel = new RaceSpinnerModel(regatta.getRaces(), regatta.getScoring());
+    this.raceSpinnerModel.setRace(chosenRace);
     this.raceSpinnerModel.addChangeListener(this);
     panel.add(label, c1);
     panel.add(new JSpinner(raceSpinnerModel), c2);
@@ -267,6 +270,10 @@ public class FinishesPane extends AbstractPane
   /**
    * Updates the finish panel with the information from the "race" and
    * "using" spinners.
+   *
+   * When the scoring used is combined, add both the teams and the
+   * division (if using Teams). Add sail numbers across all divisions
+   * (if using Rotation).
    */
   private void updateFinishPanel() {
 

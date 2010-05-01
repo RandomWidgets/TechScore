@@ -10,6 +10,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.TreeSet;
 import java.util.Comparator;
+import regatta.Regatta.RegattaScoring;
+import tscore.RaceSpinnerModel.RaceComparator;
 
 /**
  * Manages a set of races to be used in JSpinner's.
@@ -37,27 +39,69 @@ import java.util.Comparator;
 public class RaceSpinnerModel extends SpinnerListModel {
 
   private List<Race> raceList;
+
+  /**
+   * In combined scoring, display only the race NUMBER.
+   */
+  private RegattaScoring mode;
   
   /**
-   * Creates a new <code>RaceSpinnerModel</code> instance.
+   * Creates a new <code>RaceSpinnerModel</code> instance with
+   * Standard scoring mode as default
    *
+   * @param races the races to list
+   * @deprecated use the full constructor to specify regatta scoring
    */
   public RaceSpinnerModel(Race [] races) {
+    this(races, RegattaScoring.STANDARD);
+  }
+
+  /**
+   * Creates a new race spinner for the given type of regatta scoring
+   * method. If using combined division scoring, then merely display
+   * the number, but always return the race in the first division
+   *
+   * @param races the races to display in the spinner
+   * @param mode the mode to use
+   */
+  public RaceSpinnerModel(Race [] races, RegattaScoring mode) {
     super();
+    this.mode = mode;
     this.raceList = Arrays.asList(races);
     this.setList(raceList);
   }
 
+  /**
+   * Sets the race list. This method should not need to be called once
+   * the object is created. If it is, however, the list should contain
+   * races.
+   *
+   * @param list the list of <code>Race</code>s.
+   */
   @Override public void setList(List<?> list) {
+
+    // Choose the comparator to use depending on mode
+    Comparator<Race> comp;
+    if (this.mode == RegattaScoring.STANDARD)
+      comp = new RaceComparator();
+    else
+      comp = new CombinedRaceComparator();
+    
     // Order list by divisions, then number and ascertain no repeats
-    TreeSet<Race> orderedList = new TreeSet<Race>(new RaceComparator());
+    TreeSet<Race> orderedList = new TreeSet<Race>(comp);
     for (Object r: list) {
       orderedList.add((Race)r);
     }
 
     List<String> stringList = new ArrayList<String>(list.size());
     for (Race r: orderedList) {
-      stringList.add(r.toString());
+      // Add the full race representation, or just the number
+      String s;
+      if (this.mode == RegattaScoring.STANDARD)
+	s = r.toString();
+      else
+	s = String.valueOf(r.getNumber());
+      stringList.add(s);
     }
 
     super.setList(stringList);
@@ -72,7 +116,13 @@ public class RaceSpinnerModel extends SpinnerListModel {
    */
   public Race getSelectedRace() {
     String value = (String)this.getValue();
-    Race race = this.stringToRace(value);
+
+    // Create race based on mode
+    Race race;
+    if (this.mode == RegattaScoring.STANDARD)
+      race = this.stringToRace(value);
+    else
+      race = new Race(Division.A, Integer.parseInt(value));
 
     int index = this.raceList.indexOf(race);
     return this.raceList.get(index);
@@ -86,8 +136,24 @@ public class RaceSpinnerModel extends SpinnerListModel {
     return new Race(raceDiv, raceNum);
   }
 
+  /**
+   * Requires that the value to be set be a race
+   *
+   */
+  public void setRace(Race r) {
+    if (this.mode == RegattaScoring.STANDARD)
+      super.setValue(r.toString());
+    else
+      super.setValue(String.valueOf(r.getNumber()));
+  }
+
+  /**
+   * Compares races based on divisions AND numbers
+   *
+   * @author Dayan Paez
+   * @version 1.0
+   */
   public static class RaceComparator implements Comparator<Race> {
-    
     public int compare(Race r1, Race r2) {
       int rel = r1.getNumber() - r2.getNumber();
       if (rel != 0) {
@@ -97,4 +163,17 @@ public class RaceSpinnerModel extends SpinnerListModel {
     }
   }
   
+  /**
+   * Compares races based solely on their number. Made static for
+   * speed considerations, I think.
+   *
+   * Created: Sat May  1 10:03:00 2010
+   * @author Dayan Paez
+   * @version 1.4
+   */
+  public static class CombinedRaceComparator implements Comparator<Race> {
+    public int compare (Race r1, Race r2) {
+      return r1.getNumber() - r2.getNumber();
+    }
+  }
 }

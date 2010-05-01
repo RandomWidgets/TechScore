@@ -12,8 +12,9 @@ import regatta.Regatta.Division;
 import java.util.Arrays;
 
 /**
- * Describe class RaceSpinnerModel here.
+ * A full RaceSpinner for use in GUIs
  *
+ * @deprecated see RaceSpinnerModel instead
  *
  * This file is part of TechScore.
  * 
