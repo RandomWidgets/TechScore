@@ -30,6 +30,8 @@ import regatta.Breakdown;
 import regatta.Penalty;
 import regatta.TeamPenalty;
 import java.util.Comparator;
+import tscore.ICSAScorer.CleanPlaceComparator;
+import regatta.Regatta.RegattaScoring;
 
 /**
  * Scoring per Intercollegeiate Sailing Associations (ICSA)
@@ -86,7 +88,13 @@ public class ICSAScorer implements Scorer {
     this.regatta = regatta;
 
     // Parameters
-    final int FLEET = regatta.getTeams().length;
+    Team [] teams = regatta.getTeams();
+    Division [] divisions = regatta.getDivisions();
+    final int FLEET;
+    if (regatta.getScoring() == RegattaScoring.COMBINED)
+      FLEET = teams.length * divisions.length;
+    else
+      FLEET = teams.length;
 
     // Finishes whose score needs to be averaged (and their actual
     // place finish)
@@ -152,9 +160,9 @@ public class ICSAScorer implements Scorer {
 
       int total = 0;
       int num = 0;
-      for (Race otherRace: races) {
-	if (race.getDivision() == otherRace.getDivision() &&
-	    !race.equals(otherRace)) {
+      Race [] otherRaces = regatta.getRaces(race.getDivision());
+      for (Race otherRace: otherRaces) {
+	if (!race.equals(otherRace)) {
 	  // Get other score
 	  int score = regatta.getFinish(otherRace, team).getScore();
 	  if (score > 0) {
@@ -636,17 +644,14 @@ public class ICSAScorer implements Scorer {
 
   /**
    * A comparator that places non-penalized finishes ahead of
-   * penalized ones. If the races of this finish are different, then
-   * it returns the finish from the earliest race. As a last resort,
-   * if the timestamps are equal, then the finish with the top team
-   * name lexographically is returned.
+   * penalized ones, and sorts the rest according to timestamp
+   * regardless of race (to score, for example, combined divisions).
+   * As a last resort, if the timestamps are equal, then the finish
+   * with the top team name lexographically is returned.
    */
   public static class CleanPlaceComparator implements Comparator<Finish> {
     // Implementation of java.util.Comparator
     public int compare(Finish f1, Finish f2) {
-      int rel = f1.getRace().compareTo(f2.getRace());
-      if (rel != 0) return rel;
-
       if (f2.getPenalty() != null) {
 	return -1;
       }
@@ -655,7 +660,7 @@ public class ICSAScorer implements Scorer {
       }
 
       // Check for 
-      rel = f1.getTimestamp().compareTo(f2.getTimestamp());
+      int rel = f1.getTimestamp().compareTo(f2.getTimestamp());
       if (rel != 0) {
 	return rel;
       }

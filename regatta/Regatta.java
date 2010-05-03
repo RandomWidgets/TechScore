@@ -675,11 +675,15 @@ public class Regatta {
   }
 
   /**
-   * Returns an array of races with finishes
+   * Returns an array of races with finishes. If the scoring is
+   * combined, this is equivalent to calling
+   * getFinishedRaces(Division.A).
    *
    * @return a <code>Race[]</code> value
    */
   public Race [] getFinishedRaces() {
+    if (this.scoring == RegattaScoring.COMBINED)
+      return this.getFinishedRaces (Division.A);
     return this.finishes.keySet().toArray(new Race[] {});
   }
 
@@ -698,7 +702,7 @@ public class Regatta {
     }
     return races.toArray(new Race[] {});
   }
-  
+
   /*
    * Regatta listeners: inform whatever class is so interested that
    * something about the regatta has changed.
