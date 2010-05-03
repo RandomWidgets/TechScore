@@ -936,16 +936,18 @@ public class RegattaIO {
       }
 
       // Scoring
-      String scoring = getTagContent (root, "RegattaScoring");
+      String scoring = getTagContent(root, "RegattaScoring");
       RegattaScoring theScoring = null;
-      if (type == null) {
+      if (scoring == null) {
 	warnings.add ("Regatta scoring not found, using \"Standard\"");
 	theScoring = RegattaScoring.STANDARD;
       }
       else {
-	for (RegattaScoring legalScoring: RegattaScoring.values ()) {
-	  if (scoring.equalsIgnoreCase (legalScoring.toString ()))
+	for (RegattaScoring legalScoring: RegattaScoring.values()) {
+	  if (scoring.equalsIgnoreCase(legalScoring.toString())) {
 	    theScoring = legalScoring;
+	    break;
+	  }
 	}
 	if (theScoring == null) {
 	  warnings.add ("Invalid regatta scoring, using \"Standard\"");
@@ -963,6 +965,7 @@ public class RegattaIO {
       regatta = new Regatta(name);
       regatta.setStartTime(dateValue);
       regatta.setType(theType);
+      regatta.setScoring(theScoring);
       regatta.setDuration(duration);
       regatta.setBlurb(blurb);
 

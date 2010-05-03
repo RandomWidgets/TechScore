@@ -187,6 +187,8 @@ public class Finish implements Comparable<Finish> {
 
   // Implementation of Comparable interface
   public int compareTo(Finish other) {
+    if (other == null)
+      return 1;
     int rel = this.getRace().compareTo(other.getRace());
     if (rel != 0)
       return rel;

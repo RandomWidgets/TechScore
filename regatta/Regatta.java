@@ -644,12 +644,34 @@ public class Regatta {
     return null;
   }
 
+  /**
+   * Fetch the finishes for the given race. If the scoring mode is
+   * "combined", this list will contain the finishes across all
+   * divisions
+   *
+   * @param race the race whose finishes to fetch
+   * @return the list of finishes, possibly empty
+   */
   public Finish [] getFinishes(Race race) {
-    Set<Finish> set = this.finishes.get(race);
-    if (set == null) {
-      return null;
+    if (this.scoring == RegattaScoring.STANDARD) {
+      Set<Finish> set = this.finishes.get(race);
+      if (set == null) {
+	return new Finish [] {};
+      }
+      return set.toArray(new Finish [] {});
     }
-    return set.toArray(new Finish [] {});
+
+    // combined scoring
+    else { 
+      // Get the race for each division
+      Set<Finish> set = new HashSet<Finish>();
+      for (Division d : this.getDivisions()) {
+	Race r = this.getRace(d, race.getNumber());
+	set.addAll(this.finishes.get(r));
+      }
+      if (set == null) return new Finish [] {};
+      return set.toArray(new Finish [] {});
+    }
   }
 
   /**

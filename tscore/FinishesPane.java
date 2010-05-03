@@ -48,6 +48,7 @@ import regatta.Team;
 import tscore.FinishesPane.Using;
 import regatta.Regatta.RegattaScoring;
 import tscore.RaceSpinnerModel.RaceComparator;
+import regatta.Regatta.Division;
 
 /**
  * Pane for entering finishes. This pane is organized in two main
@@ -280,33 +281,50 @@ public class FinishesPane extends AbstractPane
     // Get race and entry type
     Race race = this.raceSpinnerModel.getSelectedRace();
     Using use = (Using)this.usingCombo.getSelectedItem();
+    Team [] teams = this.regatta.getTeams();
+    int length = teams.length;
+    if (this.regatta.getScoring() == RegattaScoring.COMBINED)
+      length *= this.regatta.getDivisions().length;
 
     // If the race has already been scored, "postList" will have those
     // selections in the order they were entered. Otherwise, it will
     // be empty. "preList" contains the sails or teams in
     // numerical or alphabetical order.
-    List<Team> preTeam, postTeam;
-    preTeam  = new ArrayList<Team>(Arrays.asList(this.regatta.getTeams()));
-    postTeam = new ArrayList<Team>();
-
+    Finish [] preTeam, postTeam;
+    
     // If race has been scored, rewrite those values, otherwise, list
     // the teams/sails for a new race.
     boolean isScored =
       Arrays.binarySearch(this.regatta.getFinishedRaces(), race) >= 0;
     if (isScored) {
-      Finish [] curFinishes = this.regatta.getFinishes(race);
-      Arrays.sort(curFinishes, new Finish.PlaceComparator());
-      for (Finish f : curFinishes) {
-	Team team = f.getTeam();
-	postTeam.add(team);
-	preTeam.remove(team);
+      preTeam = new Finish[0];
+      postTeam = new Finish[length];
+      Finish[] f = this.regatta.getFinishes(race);
+      for (int i = 0; i < f.length; i++)
+	postTeam[i] = new FinishListItem(f[i], this.regatta.getScoring());
+    }
+    else {
+      preTeam = new Finish[length];
+      postTeam = new Finish[0];
+      if (this.regatta.getScoring() == RegattaScoring.STANDARD) {
+	for (int i = 0; i < teams.length; i++)
+	  preTeam[i] = new FinishListItem(race, teams[i], this.regatta.getScoring());
+      }
+      else {
+	int i = 0;
+	for (Division d : this.regatta.getDivisions()) {
+	  for (Team t : teams) {
+	    preTeam[i] = new FinishListItem(this.regatta.getRace(d, race.getNumber()), t,
+					    this.regatta.getScoring());
+	    i++;
+	  }
+	}
       }
     }
 
     // Create the lists
     JList sailList, finishList;
-    this.lists = new JLinkedLists(preTeam.toArray(new Team[]{}),
-				  postTeam.toArray(new Team[]{}));
+    this.lists = new JLinkedLists(preTeam, postTeam);
     String fromTitle, toTitle;
     fromTitle = "Teams";
     toTitle   = "Order";
@@ -315,13 +333,13 @@ public class FinishesPane extends AbstractPane
     if (use == Using.ROTATION) {
       Rotation rot = this.regatta.getRotation();
       Sail [] preSail, postSail;
-      preSail  = new Sail [preTeam.size()];
-      postSail = new Sail [postTeam.size()];
-      for (int i = 0; i < preTeam.size(); i++) {
-	preSail[i] = rot.getSail(race, preTeam.get(i));
+      preSail  = new Sail [preTeam.length];
+      postSail = new Sail [postTeam.length];
+      for (int i = 0; i < preTeam.length; i++) {
+	preSail[i] = rot.getSail(race, preTeam[i].getTeam());
       }
-      for (int i = 0; i < postTeam.size(); i++) {
-	postSail[i] = rot.getSail(race, postTeam.get(i));
+      for (int i = 0; i < postTeam.length; i++) {
+	postSail[i] = rot.getSail(race, postTeam[i].getTeam());
       }
       this.lists = new JLinkedLists(preSail, postSail);
 
@@ -424,8 +442,11 @@ public class FinishesPane extends AbstractPane
   }
 
   /**
-   * Action for entering finishes.
+   * Action for entering finishes. As of 2010-05-03, objects are
+   * actual finishes and must account for combined divisions
    *
+   * @author Dayan Paez
+   * @version 2010-05-03
    */
   class EnterFinishAction extends AbstractAction {
     public EnterFinishAction() {
@@ -437,23 +458,25 @@ public class FinishesPane extends AbstractPane
       Race race = FinishesPane.this.raceSpinnerModel.getSelectedRace();
 
       int size = regatta.getTeams().length;
+      if (FinishesPane.this.regatta.getScoring() == RegattaScoring.COMBINED)
+	size *= regatta.getDivisions().length;
       boolean usingRot = (usingCombo.getSelectedItem() == Using.ROTATION);
       Rotation rot = null;
       if (usingRot) {
 	rot = FinishesPane.this.regatta.getRotation();
       }
       
-      ArrayList<Team> teams = new ArrayList<Team>(size);
+      ArrayList<Finish> teams = new ArrayList<Finish>(size);
       DefaultListModel fModel =
 	(DefaultListModel)FinishesPane.this.lists.getToList().getModel();
       for (Enumeration e = fModel.elements(); e.hasMoreElements();) {
 	Object elem = e.nextElement();
 	if (elem instanceof Sail) {
-	  teams.add(rot.getTeam(race, (Sail)elem));
+	  teams.add(new Finish(race, rot.getTeam(race, (Sail)elem)));
 	}
 	else {
-	  // Team
-	  teams.add((Team)elem);
+	  // Finish
+	  teams.add((Finish)elem);
 	}
       }
 
@@ -463,18 +486,16 @@ public class FinishesPane extends AbstractPane
       for (int i = 0; i < teams.size(); i++) {
 	calendar.add(Calendar.SECOND, 2);
 	Date timestamp = calendar.getTime();
-	Team team = teams.get(i);
-	Finish finish = new Finish(race,
-				   team,
-				   timestamp);
-	FinishesPane.this.regatta.setFinish(finish);
+	Finish list = teams.get(i);
+	Finish copy = new Finish(list.getRace(), list.getTeam(), timestamp);
+	FinishesPane.this.regatta.setFinish(copy);
       }
 
       regatta.fireRegattaChange(new RegattaEvent(regatta,
 						 RegattaEventType.FINISH,
 						 this));
       // turn to the next race
-      raceSpinnerModel.setValue(FinishesPane.this.getNextUnscoredRace());
+      raceSpinnerModel.setRace(FinishesPane.this.getNextUnscoredRace());
     }
   }
 
@@ -706,9 +727,10 @@ public class FinishesPane extends AbstractPane
 
       // Enable the enter finish action if all the teams have been
       // added to the tolist (check just the number of items)
-      boolean yes = FinishesPane.this.regatta.getTeams().length ==
-	model.getSize();
-      FinishesPane.this.enterAction.setEnabled(yes);
+      int length = FinishesPane.this.regatta.getTeams().length;
+      if (FinishesPane.this.regatta.getScoring() == RegattaScoring.COMBINED)
+	length *= FinishesPane.this.regatta.getDivisions().length;
+      FinishesPane.this.enterAction.setEnabled(length == model.getSize());
     }
     private void demote(int index) {
       DefaultListModel model;

@@ -225,13 +225,12 @@ public class DetailsPane
     this.add(typeField, c2);
 
     //- Scoring
-    //- Type
     c1.gridy++; c2.gridy++; c3.gridy++;
     c2.weightx = 1.0;
     c2.gridwidth = 2;
     label = Factory.label("Scoring:");
     scoringField = new JComboBox(RegattaScoring.values());
-    scoringField.setSelectedItem(regatta.getType());
+    scoringField.setSelectedItem(regatta.getScoring());
     scoringField.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent evt) {
 	  regatta.setScoring((RegattaScoring)scoringField.getSelectedItem());
