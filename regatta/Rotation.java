@@ -11,6 +11,7 @@ import java.util.TreeSet;
 import java.util.Map;
 import java.util.List;
 import java.util.HashSet;
+import java.util.Collection;
 
 /**
  * Rotations manage the sails that each team is racing in for a given
@@ -192,11 +193,85 @@ public class Rotation {
    */
   public Race [] normalize() {
     List<Race> badRaces = new ArrayList<Race>();
+    Map<Team, Sail> teamMap;
+    Set<Sail> uniqueSails;
     for (Race race : this.rot.keySet()) {
-      if (this.rot.get(race).containsValue(null)) {
+      teamMap = this.rot.get(race);
+      // Check for missing sails
+      if (teamMap.containsValue(null)) {
+	badRaces.add(race);
+      }
+      // Check for repeats
+      else {
+	uniqueSails = new HashSet<Sail>(teamMap.values());
+	if (uniqueSails.size() < teamMap.size())
+	  badRaces.add(race);
+      }
+    }
+    return badRaces.toArray(new Race[]{});
+  }
+  
+  /**
+   * In the case of combined scoring, there must be a unique sail
+   * number for each team in every race number across all
+   * divisions. The list of incomplete races in this case will contain
+   * the faulty race and division. Therefore, if for race 3 the
+   * mandate of unique sails is not met, then all races numbered 3
+   * across all the divisions will be returned.
+   *
+   * @param divisions the set of divisions to which normalize
+   * @return list of bad divisions
+   */
+  public Race [] normalize(Division [] divisions) {
+    Set<Race> badRaces = new TreeSet<Race>();
+    Map<Team, Sail> teamMap;
+    Set<Race> raceSet = this.rot.keySet();
+    // 1. Check that every division has all the races by creating a
+    // set of unique race numbers
+    Set<Integer> raceNums = new HashSet<Integer>();
+    for (Race race : raceSet)
+      raceNums.add(new Integer(race.getNumber()));
+    List<Integer> goodNums = new ArrayList<Integer>(raceNums);
+
+    for (Integer num : raceNums) {
+      for (Division d : divisions) {
+	if (!raceSet.contains(new Race(d, num))) {
+	  for (Division d2 : divisions)
+	    badRaces.add(new Race(d2, num));
+	  goodNums.remove(num);
+	  break;
+	}
+      }
+    }
+
+    // At this point, goodNums contains the race numbers for which
+    // there is a rotation set across all the divisions. Next, check
+    // that no race contains a null sail (unset)
+    for (Race race : raceSet) {
+      teamMap = this.rot.get(race);
+      // Check for missing sails
+      if (teamMap.containsValue(null)) {
 	badRaces.add(race);
       }
     }
+
+    // Next, check that the sails are unique across all divisions
+    Set<Sail> uniqueSails;
+    for (int num : goodNums) {
+      uniqueSails = new HashSet<Sail>();
+      for (Division d : divisions) {
+	int numUnique = uniqueSails.size();
+	Collection<Sail> sails = this.rot.get(new Race(d, num)).values();
+	uniqueSails.addAll(sails);
+
+	if (uniqueSails.size() < numUnique + sails.size()) {
+	  for (Division d2 : divisions)
+	    badRaces.add(new Race(d2, num));
+	  break;
+	}
+      }
+    }
+
     return badRaces.toArray(new Race[]{});
   }
 
@@ -224,4 +299,32 @@ public class Rotation {
       System.out.println();
     }
   }
+
+  public static void main (String [] args) {
+    Rotation rot = new Rotation ();
+    Team t1 = new Team ("MIT");
+    Team t2 = new Team ("HAR");
+    Team t3 = new Team ("TUF");
+
+    Race r1 = new Race (Division.A, 1);
+    Race r2 = new Race (Division.B, 1);
+
+    // Add sails
+    rot.setSail (r1, t1, new Sail ("A"));
+    rot.setSail (r1, t2, new Sail ("B"));
+    rot.setSail (r1, t3, new Sail ("C"));
+    rot.setSail (r2, t1, new Sail ("D"));
+    rot.setSail (r2, t2, new Sail ("E"));
+    rot.setSail (r2, t3, new Sail ("A"));
+
+    rot.dump ();
+
+    System.out.print ("Bad races: ");
+    for (Race r : rot.normalize ())
+      System.out.print (r + "  ");
+    System.out.println ();
+
+    System.out.print ("Bad races: ");
+    for (Race r : rot.normalize (new Division [] {Division.A, Division.B}))
+      System.out.print (r + "  ");}
 }

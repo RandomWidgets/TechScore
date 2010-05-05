@@ -79,6 +79,10 @@ public class Regatta {
 
   private Map<Division, Map<Team, TeamPenalty>> teamPenaltyMap;
 
+  // 2010-05-03: Support for daily summaries
+  private Map<Date, String> blurbs;
+  
+
   /**
    * Creates a new <code>Regatta</code> instance.
    *
@@ -98,6 +102,8 @@ public class Regatta {
 
     numDivisions = 0;
     numRaces     = 0;
+
+    this.blurbs = new TreeMap<Date, String>();
   }
 
   // Regatta fields
@@ -186,22 +192,47 @@ public class Regatta {
   public int getDuration() {return this.duration;}
 
   /**
-   * Describe <code>setBlurb</code> method here.
+   * Sets the daily summary for the first day of competition
    *
    * @param s a <code>String</code> value
+   * @deprecated use <code>setBlurb(Date d, String s)</code> instead
    */
   public void setBlurb(String s) {
-    this.blurb = s;
-    this.fireRegattaChange(RegattaEventType.DETAILS);
+    this.setBlurb(this.getStartTime(), s);
   }
   /**
-   * Describe <code>getBlurb</code> method here.
+   * Returns the summary for the first day of competition
    *
    * @return a <code>String</code> value
+   * @deprecated use <code>getBlurb(Date d)</code> instead
    */
-  public String getBlurb() {return this.blurb;}
+  public String getBlurb() {return this.getBlurb(this.getStartTime());}
 
-  
+  // Daily summaries
+  /**
+   * Sets the given summary for the given day of competition
+   *
+   * @param d the date
+   * @param s the blurb
+   * @throws IllegalArgumentException if invalid date
+   */
+  public void setBlurb(Date d, String s) {
+    this.blurbs.put(d, s);
+    this.fireRegattaChange(RegattaEventType.DETAILS);
+  }
+
+  /**
+   * Fetches the summary for the given day of competition
+   *
+   * @param d the day of compeitition
+   * @return the summary (blurb)
+   */
+  public String getBlurb(Date d) {
+    String b = this.blurbs.get(d);
+    if (b == null) return "";
+    return b;
+  }
+
   /*
    * Divisions and races
    */

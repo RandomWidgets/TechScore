@@ -208,7 +208,8 @@ public class RotationsPane extends AbstractPane
     }
 
 
-    //- Boat panel contents
+    //- Boat panel contents: in the case of combined divisions, add
+    //- the teams for each division 
     p1.gridy++;
     p1.weighty = 1.0;
     JPanel sailPanel = new JPanel();

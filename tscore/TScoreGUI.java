@@ -203,6 +203,7 @@ public class TScoreGUI
     dbPane.setDatabaseDir(this.databaseDir);
 
     editPanes = new AbstractPane [] {new DetailsPane(this.regatta),
+				     new DailySummaryPane(this.regatta),
 				     new RacesPane(this.regatta),
 				     new RotationsPane(this.regatta),
 				     new TweakRotationsPane(this.regatta),
@@ -235,11 +236,11 @@ public class TScoreGUI
     // Toolbar
     EditPaneActionGroup.
       EditPaneAction [] toolbarActs = {paneActions[0],
-				       paneActions[1],
 				       paneActions[2],
-				       paneActions[4],
+				       paneActions[3],
 				       paneActions[5],
-				       paneActions[7]};
+				       paneActions[6],
+				       paneActions[8]};
     for (EditPaneActionGroup.EditPaneAction a: toolbarActs) {
       JToggleButton tbutton;
       toolBar.add(tbutton = new JToggleButton(a));
@@ -945,8 +946,10 @@ public class TScoreGUI
 	putValue(SHORT_DESCRIPTION, p.toString());
 	putValue(SMALL_ICON, p.getIcon());
 	putValue(Factory.SELECTED_KEY, new Boolean(false));
+	/*
 	putValue(ACCELERATOR_KEY,
 		 KeyStroke.getKeyStroke(keys[keyIndex++], 0));
+	*/
 
 	// Register this action with daddy
 	EditPaneActionGroup.this.actions.add(this);
