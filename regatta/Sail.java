@@ -109,14 +109,19 @@ public class Sail implements Comparable<Sail> {
   // Implementation of Comparable
 
   /**
-   * Compares two sails lexically
+   * Compares two sails intelligently, respecting the numerical nature
+   * of the sails where appropriate
    *
    * @param other the other Sail
-   * @return -1 if this sail comes before
+   * @return <1 if this sail comes before
    * @return  0 if the two are equal
-   * @return  1 if this sail comes after
+   * @return >1 if this sail comes after
    */
   public int compareTo(Sail other) {
+    if (this.getPrefix().equals(other.getPrefix()) &&
+	this.getSuffix().equals(other.getSuffix())) {
+      return this.getNumber() - other.getNumber();
+    }
     return this.getSail ().compareTo(other.getSail ());
   }
 
@@ -162,6 +167,24 @@ public class Sail implements Comparable<Sail> {
     return this.number;
   }
 
+  /**
+   * Returns the prefix, if any, for this sail
+   *
+   * @return the prefix, or the empty String ("")
+   */
+  public String getPrefix() {
+    return this.preSail;
+  }
+
+  /**
+   * Returns the suffix, if any, for this sail
+   *
+   * @return the suffix, or the empty String ("")
+   */
+  public String getSuffix() {
+    return this.postSail;
+  }
+  
   /**
    * Adds the given amount to the numerical portion of this sail
    *
