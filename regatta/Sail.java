@@ -25,7 +25,7 @@ public class Sail implements Comparable<Sail> {
    *
    * @param n an <code>String</code> value for the sail
    */
-  public Sail(String n) {
+  public Sail(String n) throws IllegalArgumentException {
     this.setSail(n);
   }
 
@@ -43,7 +43,7 @@ public class Sail implements Comparable<Sail> {
    *
    * @param newSail The new Sail value.
    */
-  public final void setSail(final String newSail) {
+  public final void setSail(String newSail) throws IllegalArgumentException {
     // Interprets and parses the argument in the hopes of dividing it
     // into up to three parts: a String prefix, a numerical component,
     // and a String suffix. Should the newSail contain two sets of
@@ -58,6 +58,11 @@ public class Sail implements Comparable<Sail> {
     //   98def |   "" |     98 | def
     //    4b21 |   4b |     21 | ""
     //
+    newSail = newSail.trim();
+    if (newSail.length() == 0) {
+      throw new IllegalArgumentException("Sails must not be empty");
+    }
+
     StringBuilder preSail = new StringBuilder ();
     StringBuilder postSail = new StringBuilder ();
     StringBuilder numString = new StringBuilder ();
