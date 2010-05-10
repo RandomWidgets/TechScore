@@ -38,6 +38,8 @@ import regatta.Rotation.RotationStyle;
 import regatta.Rotation.RotationType;
 import regatta.Sail;
 import regatta.Team;
+import javax.swing.SpinnerModel;
+import java.util.List;
 
 /**
  * The pane where rotations get created/edited.
@@ -74,7 +76,7 @@ public class RotationsPane extends AbstractPane
   private JComponent offsetField;
   private JTextField raceField;
   private JList divisionField;
-  private ArrayList<SpinnerNumberModel> sails;
+  private List<SpinnerModel> sails;
 
   private CreateRotationAction cAction;
   private DeleteRotationAction dAction;
@@ -230,15 +232,24 @@ public class RotationsPane extends AbstractPane
     c2.weightx = 0.2;
     c1.fill = GridBagConstraints.HORIZONTAL;
     c2.fill = GridBagConstraints.HORIZONTAL;
-    this.sails = new ArrayList<SpinnerNumberModel>(teams.length);
+    this.sails = new ArrayList<SpinnerModel>(teams.length);
+    SailSpinnerModel ssm;
+    JSpinner spinner;
     for (int i = 0; i < teams.length; i++) {
-      sm = new SpinnerNumberModel(i+1, 1, 100, 1);
-      this.sails.add(sm);
-      sm.addChangeListener(this);
+      Sail sail = new Sail(String.valueOf(i + 1));
+      // ssm = new SailSpinnerModel(sail);
+      // this.sails.add(ssm);
+      // spinner = Factory.spinner(ssm);
+      // spinner.getEditor().setEnabled(true);
+      
+      spinner = new SailSpinner(sail);
+      ssm = (SailSpinnerModel)spinner.getModel();
+      
+      ssm.addChangeListener(this);
       String name = teams[i].getLongname() + " " +
 	teams[i].getShortname();
       sailPanel.add(Factory.label(name, 150), c1);
-      sailPanel.add(Factory.spinner(sm), c2);
+      sailPanel.add(spinner, c2);
       c1.gridy++;
       c2.gridy++;
     }
@@ -306,9 +317,9 @@ public class RotationsPane extends AbstractPane
   public void stateChanged(ChangeEvent ev) {
     if (ev.getSource() instanceof SpinnerNumberModel) {
 
-      HashSet<Number> set = new HashSet<Number>(sails.size());
+      Set<Sail> set = new HashSet<Sail>(sails.size());
       for (int i = 0; i < sails.size(); i++) {
-	if (!set.add(sails.get(i).getNumber())) {
+	if (!set.add((Sail)sails.get(i).getValue())) {
 	  this.cAction.setEnabled(false);
 	  return;
 	}

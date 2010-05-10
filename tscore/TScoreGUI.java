@@ -5,7 +5,6 @@ import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Point;
 import java.awt.Window;
-import java.awt.event.*;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.prefs.Preferences;
