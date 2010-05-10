@@ -76,8 +76,7 @@ public class RotationsPane extends AbstractPane
   private JComponent offsetField;
   private JTextField raceField;
   private JList divisionField;
-  private List<SpinnerModel> sails;
-
+  private ArrayList<SailSpinner> sails;
   private CreateRotationAction cAction;
   private DeleteRotationAction dAction;
   private RotationFactory rotFactory = null;
@@ -232,24 +231,17 @@ public class RotationsPane extends AbstractPane
     c2.weightx = 0.2;
     c1.fill = GridBagConstraints.HORIZONTAL;
     c2.fill = GridBagConstraints.HORIZONTAL;
-    this.sails = new ArrayList<SpinnerModel>(teams.length);
-    SailSpinnerModel ssm;
-    JSpinner spinner;
+    this.sails = new ArrayList<SailSpinner>(teams.length);
+    SailSpinner ss;
     for (int i = 0; i < teams.length; i++) {
-      Sail sail = new Sail(String.valueOf(i + 1));
-      // ssm = new SailSpinnerModel(sail);
-      // this.sails.add(ssm);
-      // spinner = Factory.spinner(ssm);
-      // spinner.getEditor().setEnabled(true);
-      
-      spinner = new SailSpinner(sail);
-      ssm = (SailSpinnerModel)spinner.getModel();
-      
-      ssm.addChangeListener(this);
+      ss = new SailSpinner(new Sail(String.valueOf(i+1)));
+      this.sails.add(ss);
+      ss.addChangeListener(this);
+
       String name = teams[i].getLongname() + " " +
 	teams[i].getShortname();
       sailPanel.add(Factory.label(name, 150), c1);
-      sailPanel.add(spinner, c2);
+      sailPanel.add(ss, c2);
       c1.gridy++;
       c2.gridy++;
     }
@@ -316,7 +308,6 @@ public class RotationsPane extends AbstractPane
    */
   public void stateChanged(ChangeEvent ev) {
     if (ev.getSource() instanceof SpinnerNumberModel) {
-
       Set<Sail> set = new HashSet<Sail>(sails.size());
       for (int i = 0; i < sails.size(); i++) {
 	if (!set.add((Sail)sails.get(i).getValue())) {
