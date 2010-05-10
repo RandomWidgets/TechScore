@@ -134,8 +134,6 @@ public class SailSpinner extends TSpinner implements ChangeListener {
      *
      */
     public Object getPreviousValue() {
-      this.sync();
-
       Sail s1 = (Sail)this.getValue();
       if (s1.getNumber() == 1)
 	return null;
@@ -150,8 +148,6 @@ public class SailSpinner extends TSpinner implements ChangeListener {
      *
      */
     public Object getNextValue() {
-      this.sync();
-
       Sail s1 = (Sail)this.getValue();
       Sail s2 = new Sail(s1.toString());
       s2.add(1);
@@ -171,7 +167,10 @@ public class SailSpinner extends TSpinner implements ChangeListener {
      * Get the current sail
      *
      */
-    public Object getValue() {return this.currentSail;}
+    public Object getValue() {
+      this.sync();
+      return this.currentSail;
+    }
   }
 
   /**
