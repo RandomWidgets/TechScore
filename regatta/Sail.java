@@ -127,7 +127,7 @@ public class Sail implements Comparable<Sail> {
 	this.getSuffix().equals(other.getSuffix())) {
       return this.getNumber() - other.getNumber();
     }
-    return this.getSail ().compareTo(other.getSail ());
+    return this.getSail().compareToIgnoreCase(other.getSail());
   }
 
   /**

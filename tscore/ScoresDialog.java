@@ -33,7 +33,7 @@ import regatta.RP.BoatRole;
 import regatta.TeamPenalty;
 
 /**
- * Describe class ScoresDialog here.
+ * Displays the score for the regatta
  *
  *
  * This file is part of TechScore.
@@ -607,6 +607,9 @@ public class ScoresDialog
       }
       else if (type == RegattaEventType.RP) {
 	this.updateDivisions();
+      }
+      else if (type == RegattaEventType.SCORING) {
+	this.update();
       }
 
     }

@@ -37,18 +37,17 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import regatta.Finish;
-import regatta.Finish.PlaceComparator;
 import regatta.Race;
 import regatta.Regatta;
+import regatta.Regatta.Division;
+import regatta.Regatta.RegattaScoring;
 import regatta.RegattaEvent;
 import regatta.RegattaEvent.RegattaEventType;
 import regatta.Rotation;
 import regatta.Sail;
 import regatta.Team;
 import tscore.FinishesPane.Using;
-import regatta.Regatta.RegattaScoring;
 import tscore.RaceSpinnerModel.RaceComparator;
-import regatta.Regatta.Division;
 
 /**
  * Pane for entering finishes. This pane is organized in two main

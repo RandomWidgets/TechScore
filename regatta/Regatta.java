@@ -147,7 +147,7 @@ public class Regatta {
    */
   public void setScoring (RegattaScoring t) {
     this.scoring = t;
-    this.fireRegattaChange (RegattaEventType.DETAILS);
+    this.fireRegattaChange(RegattaEventType.SCORING);
   }
   /**
    * Fetches the scoring rules in use
@@ -614,10 +614,48 @@ public class Regatta {
    * @return a <code>Race[]</code> value
    */
   public Race [] normalizeFinishes() {
-    List<Race> badRaces = new ArrayList<Race>();
-    for (Race race : this.finishes.keySet()) {
-      if (this.finishes.get(race).size() != this.teams.size()) {
-	badRaces.add(race);
+    int numTeams = this.teams.size();
+    Set<Race> badRaces = new TreeSet<Race>();
+    if (this.getScoring() == RegattaScoring.STANDARD) {
+      for (Race race : this.finishes.keySet()) {
+	if (this.finishes.get(race).size() != numTeams) {
+	  badRaces.add(race);
+	}
+      }
+      return badRaces.toArray(new Race[]{});
+    }
+
+    // Combined scoring
+    Set<Race> raceSet = this.finishes.keySet();
+
+    // 1. Check that every division has all the races by creating a
+    // set of unqiue race numbers
+    Set<Integer> raceNums = new HashSet<Integer>();
+    for (Race race : raceSet)
+      raceNums.add(new Integer(race.getNumber()));
+    List<Integer> goodNums = new ArrayList<Integer>(raceNums);
+    Division [] divisions = this.getDivisions();
+
+    for (Integer num: raceNums) {
+      for (Division d : divisions) {
+	if (!raceSet.contains(new Race(d, num))) {
+	  for (Division d2 : divisions)
+	    badRaces.add(new Race(d2, num));
+	  goodNums.remove(num);
+	  break;
+	}
+      }
+    }
+
+    // At this point, goodNums contains the race numbers for which
+    // there is a finish across all the divisions. Next check that the
+    // numbers match
+    for (Integer num : goodNums) {
+      for (Division d : divisions) {
+	Race race = new Race(d, num);
+	if (this.finishes.get(race).size() != numTeams) {
+	  badRaces.add(race);
+	}
       }
     }
     return badRaces.toArray(new Race[]{});

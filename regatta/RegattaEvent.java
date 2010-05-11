@@ -12,10 +12,12 @@ package regatta;
 public class RegattaEvent {
 
   /**
-   * Different types of changes
+   * Different types of changes: SCORING refers to changes in the way
+   * the regatta is scored: combined vs. standard. The others are more
+   * self-explanatory.
    */
   public static enum RegattaEventType {
-    DETAILS, NAME, TEAM, RACE, ROTATION, FINISH, SCORE, RP, RP_DATA
+    DETAILS, NAME, TEAM, RACE, ROTATION, FINISH, SCORE, RP, RP_DATA, SCORING
       };
   
   private RegattaEventType changeType;

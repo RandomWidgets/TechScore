@@ -1050,10 +1050,19 @@ public class RegattaIO {
 	}
 
 	// Check integrity of rotation
-	Race [] badRaces = rot.normalize();
+	Race [] badRaces;
+	if (regatta.getScoring() == RegattaScoring.COMBINED)
+	  badRaces = rot.normalize(regatta.getDivisions());
+	else
+	  badRaces = rot.normalize();
+
 	if (badRaces.length > 0) {
 	  String raceString = Factory.implode(badRaces, ", ");
 	  warnings.add("Rotation is incomplete for race(s): " + raceString);
+	  // remove them too
+	  for (Race race : badRaces) {
+	    rot.removeRace(race);
+	  }
 	}
       }
       regatta.setRotation(rot);
