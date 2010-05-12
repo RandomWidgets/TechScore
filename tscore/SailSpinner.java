@@ -7,6 +7,8 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import regatta.Sail;
+import javax.swing.JComponent;
+import javax.swing.SpinnerModel;
 
 /**
  * Sail spinners allow changing the value of a sail intelligently,
@@ -37,7 +39,7 @@ import regatta.Sail;
  * @author <a href="mailto:dayan@localhost">Dayan Paez</a>
  * @version 1.0
  */
-public class SailSpinner extends TSpinner implements ChangeListener {
+public class SailSpinner extends TSpinner {
 
   private SailSpinnerModel model;
   private SailFormattedField field;
@@ -48,31 +50,27 @@ public class SailSpinner extends TSpinner implements ChangeListener {
    */
   public SailSpinner(Sail s) {
     super();
-    this.model = new SailSpinnerModel();
-    this.model.addChangeListener(this);
+    this.model = new SailSpinnerModel(s);
     this.setModel(model);
     
-    this.field = new SailFormattedField();
-    this.setEditor(field);
-    this.setValue(s);
+    this.field = (SailFormattedField)this.getEditor();
+    this.field.setText(s.toString());
   }
 
   /**
-   * Creates an empty <code>SailSpinner</code>
+   * Creates and returns the SailFormattedField used for this
+   * spinner, as specified in the JSpinner documentation
    *
+   * @param model ignored
+   * @return <code>SailFormattedField</code> object
    */
-  public SailSpinner() {
-    this(null);
+  protected JComponent createEditor(SpinnerModel model) {
+    return new SailFormattedField();
   }
 
   public void setValue(Sail s) {
     this.model.setValue(s);
-  }
-
-  // Implementation of ChangeListener
-
-  public void stateChanged(ChangeEvent evt) {
-    this.field.setText(this.model.getValue().toString());
+    this.fireStateChanged();
   }
 
   /**
@@ -108,15 +106,7 @@ public class SailSpinner extends TSpinner implements ChangeListener {
      *
      */
     public SailSpinnerModel(Sail s) {
-      this.setValue(s);
-    }
-
-    /**
-     * Creates a new <code>SailSpinnerModel</code> instance with no value
-     *
-     */
-    public SailSpinnerModel() {
-      this(null);
+      this.currentSail = s;
     }
 
     /**
@@ -124,8 +114,9 @@ public class SailSpinner extends TSpinner implements ChangeListener {
      *
      */
     private void sync() {
-      SailFormattedField f = (SailFormattedField)SailSpinner.this.getEditor();
-      this.setValue(new Sail(f.getText()));
+      Sail s = new Sail(SailSpinner.this.field.getText());
+      if (!s.equals(this.currentSail))
+	this.setValue(s);
     }
 
     /**
@@ -160,6 +151,7 @@ public class SailSpinner extends TSpinner implements ChangeListener {
      */
     public void setValue(Object s) {
       this.currentSail = (Sail)s;
+      SailSpinner.this.field.setText(this.currentSail.toString());
       this.fireStateChanged();
     }
 

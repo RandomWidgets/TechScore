@@ -40,6 +40,7 @@ import regatta.Sail;
 import regatta.Team;
 import javax.swing.SpinnerModel;
 import java.util.List;
+import regatta.Regatta.RegattaScoring;
 
 /**
  * The pane where rotations get created/edited.
@@ -128,6 +129,8 @@ public class RotationsPane extends AbstractPane
     c1.weightx = 0.0;
     c2.weightx = 1.0;    
 
+    Division [] divisions = regatta.getDivisions();
+
     //  -Type
     Team [] teams = this.regatta.getTeams();
     int numTeams = teams.length;
@@ -198,7 +201,7 @@ public class RotationsPane extends AbstractPane
     //      -Division order
     c1.gridy++; c2.gridy++;
     label = Factory.label("Division order:");
-    divisionField = new JShuffleList(regatta.getDivisions());    
+    divisionField = new JShuffleList(divisions);    
     divisionField.setBorder(BorderFactory.createEtchedBorder());
     paramPanel.add(label, c1);
     paramPanel.add(divisionField, c2);
@@ -231,19 +234,45 @@ public class RotationsPane extends AbstractPane
     c2.weightx = 0.2;
     c1.fill = GridBagConstraints.HORIZONTAL;
     c2.fill = GridBagConstraints.HORIZONTAL;
-    this.sails = new ArrayList<SailSpinner>(teams.length);
+    
+    int length = teams.length;
+    if (regatta.getScoring() == RegattaScoring.COMBINED)
+      length *= divisions.length;
+    this.sails = new ArrayList<SailSpinner>(length);
     SailSpinner ss;
-    for (int i = 0; i < teams.length; i++) {
-      ss = new SailSpinner(new Sail(String.valueOf(i+1)));
-      this.sails.add(ss);
-      ss.addChangeListener(this);
 
-      String name = teams[i].getLongname() + " " +
-	teams[i].getShortname();
-      sailPanel.add(Factory.label(name, 150), c1);
-      sailPanel.add(ss, c2);
-      c1.gridy++;
-      c2.gridy++;
+    // Combined scoring
+    if (regatta.getScoring() == RegattaScoring.COMBINED) {
+      int i = 0;
+      for (Division d : divisions) {
+	for (Team t : teams) {
+	  ss = new SailSpinner(new Sail(String.valueOf(i+1)));
+	  this.sails.add(ss);
+	  ss.addChangeListener(this);
+
+	  String name = String.format("%s: %s %s", d, t.getLongname(), t.getShortname());
+	  sailPanel.add(Factory.label(name, 150), c1);
+	  sailPanel.add(ss, c2);
+	  c1.gridy++;
+	  c2.gridy++;
+
+	  i++;
+	}
+      }
+    }
+    else {
+      for (int i = 0; i < teams.length; i++) {
+	ss = new SailSpinner(new Sail(String.valueOf(i+1)));
+	this.sails.add(ss);
+	ss.addChangeListener(this);
+
+	String name = teams[i].getLongname() + " " +
+	  teams[i].getShortname();
+	sailPanel.add(Factory.label(name, 150), c1);
+	sailPanel.add(ss, c2);
+	c1.gridy++;
+	c2.gridy++;
+      }
     }
     //   add tail
     c1.gridwidth = 2;
@@ -307,7 +336,7 @@ public class RotationsPane extends AbstractPane
    * starting sail numbers, checking for repeats.
    */
   public void stateChanged(ChangeEvent ev) {
-    if (ev.getSource() instanceof SpinnerNumberModel) {
+    if (ev.getSource() instanceof SailSpinner) {
       Set<Sail> set = new HashSet<Sail>(sails.size());
       for (int i = 0; i < sails.size(); i++) {
 	if (!set.add((Sail)sails.get(i).getValue())) {
@@ -341,6 +370,7 @@ public class RotationsPane extends AbstractPane
       RotationType type = (RotationType)typeField.getSelectedItem();
       RotationStyle style =
 	(RotationStyle)styleField.getSelectedItem();
+      RegattaScoring scoring = this.regatta.getScoring();
       SpinnerNumberModel sm = (SpinnerNumberModel)setSizeField.getModel();
       int setSize = sm.getNumber().intValue();
 
@@ -358,7 +388,6 @@ public class RotationsPane extends AbstractPane
 					JOptionPane.ERROR_MESSAGE);
 	  return;
 	}
-
       }
 
       // Create race map
