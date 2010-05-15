@@ -26,6 +26,7 @@ import java.awt.Insets;
 import java.io.File;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerModel;
+import java.util.Comparator;
 
 /**
  * Provides static methods for creating components
@@ -201,68 +202,102 @@ public class Factory {
   }
 
   /**
+   * Implementation of merge sort for multiple lists at a time, see
+   * <code>multiSort(Comparator...)</code>
+   *
+   * @param list1 the template list to sort
+   * @param lists the remaining lists
+   */
+  public static <T extends Comparable> void multiSort(List<T> list1, List ... lists) {
+    Comparator<T> comp = new Comparator<T>() {
+      public int compare(T o1, T o2) {
+	return o1.compareTo(o2);
+      }
+    };
+    Factory.multiSort(comp, list1, lists);
+  }
+
+  /**
    * Sorts a list according to the order of the items in the first
    * list
    *
+   * @param comp the comparator object
    * @param list1 an <code>Comparable</code> value
-   * @param list2 an <code>Object</code> value
+   * @param lists the remaining lists
    */
-  public static <T extends Comparable, E>
-			   void multiSort(List<T> list1,
-					  List<E> list2) {
+  public static <T> void multiSort(Comparator<T> comp, List<T> list1, List ... lists) {
+    List list2 = lists[0];
 
     if (list1.size() == 1) {
       return;
     }
 
+    int num   = lists.length;
     int end   = list1.size();
     int limit = end / 2;
     List<T> half11, half12;
-    List<E> half21, half22;
-    half11 = list1.subList(0, limit);
-    half12 = list1.subList(limit, end);
-    half21 = list2.subList(0, limit);
-    half22 = list2.subList(limit, end);
+    List [] half21, half22;
+    half11 = new ArrayList<T>(list1.subList(0, limit));
+    half12 = new ArrayList<T>(list1.subList(limit, end));
+    half21 = (ArrayList[])new ArrayList[num];
+    half22 = (ArrayList[])new ArrayList[num];
+    for (int i = 0; i < num; i++) {
+      half21[i] = new ArrayList(lists[i].subList(0, limit));
+      half22[i] = new ArrayList(lists[i].subList(limit, end));
+    }
 
-    Factory.multiSort(half11, half21);
-    Factory.multiSort(half12, half22);
+    Factory.multiSort(comp, half11, half21);
+    Factory.multiSort(comp, half12, half22);
 
     // Merge back together
     int i = 0;
     int j = 0;
     List<T> copy1 = new ArrayList<T>(end);
-    List<E> copy2 = new ArrayList<E>(end);
+    List [] copy2 = (ArrayList[])new ArrayList[num];
+    for (int k = 0; k < num; k++) {
+      copy2[k] = new ArrayList(end);
+    }
     while (i < half11.size() && j < half12.size()) {
       T obj1 = half11.get(i);
       T obj2 = half12.get(j);
 
-      if (obj1.compareTo(obj2) <= 0) {
+      if (comp.compare(obj1, obj2) <= 0) {
 	copy1.add(obj1);
-	copy2.add(half21.get(i));
+	for (int k = 0; k < num; k++) {
+	  copy2[k].add(half21[k].get(i));
+	}
 	i++;
       }
       else {
 	copy1.add(obj2);
-	copy2.add(half22.get(j));
+	for (int k = 0; k < num; k++) {
+	  copy2[k].add(half22[k].get(k));
+	}
 	j++;
       }
     }
     // Add remaining ones
     while (i < half11.size()) {
       copy1.add(half11.get(i));
-      copy2.add(half21.get(i));
+      for (int k = 0; k < num; k++) {
+	copy2[k].add(half21[k].get(i));
+      }
       i++;
     }
     while (j < half12.size()) {
       copy1.add(half12.get(j));
-      copy2.add(half22.get(j));
+      for (int k = 0; k < num; k++) {
+	copy2[k].add(half22[k].get(j));
+      }
       j++;
     }
 
     // Copy back
     for (int r = 0; r < end; r++) {
       list1.set(r, copy1.get(r));
-      list2.set(r, copy2.get(r));
+      for (int k = 0; k < num; k++) {
+	lists[k].set(r, copy2[k].get(r));
+      }
     }
   }
 
@@ -429,8 +464,5 @@ public class Factory {
     for (int i = 0; i < ints.size(); i++) {
       System.out.println(ints.get(i) + "\t" + strs.get(i));
     }
-
-    Integer num = 3;
-    System.out.println(num);
   }
 }

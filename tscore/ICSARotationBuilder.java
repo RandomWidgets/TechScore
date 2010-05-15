@@ -1,22 +1,17 @@
 package tscore;
 
-import regatta.Regatta;
-import regatta.RegattaListener;
-import regatta.RegattaEvent;
-import regatta.Rotation;
 import java.util.ArrayList;
-import regatta.Regatta.Division;
-import regatta.Race;
-import java.util.TreeMap;
-import regatta.Team;
-import regatta.Sail;
-import regatta.Rotation.RotationType;
-import regatta.Rotation.RotationStyle;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.HashMap;
-import java.util.Map;
+
+import regatta.Race;
+import regatta.Regatta;
+import regatta.Regatta.Division;
+import regatta.Rotation;
+import regatta.Rotation.RotationStyle;
+import regatta.Rotation.RotationType;
+import regatta.Sail;
+import regatta.Team;
 
 /**
  * Implementation of a rotation builder that understands all the
@@ -60,10 +55,97 @@ public class ICSARotationBuilder {
   }
 
   /**
+   * Create rotation for combined divisions by using the Rotation object
+   * passed. Since this is combined division rotation, there is no
+   * <code>RotationStyle</code> necessary.
+   *
+   * The teams, divisions, and sails represent a three-way map, and a
+   * <code>IllegalArgumentException</code> is thrown if the sizes are
+   * not equal. The <code>setSize</code> is as in
+   * <code>fillRotation</code>. As an example of a combined rotation,
+   * consider the following parameters and the resulting table:
+   *
+   * <ul>
+   *  <li><code>type</code> swap</li>
+   *  <li><code>teams</code> {"MIT", "HAR", "YAL", "HAR", "YAL", "MIT"}</li>
+   *  <li><code>divisions</code> {"A", "A", "B", "B", "A", "B"}</li>
+   *  <li><code>sails</code>  { 1, 2, 3, 4, 5, 6}</li>
+   *  <li><code>raceNums</code> { 1, 2, 3, 4}</li>
+   * </ul>
+   *
+   * <table>
+   *  <tr><th>Div</th><th>Race</th><th>1</th><th>2</th><th>3</th><th>4</th></tr>
+   *  <tr><th>  A</th><th> MIT</th><td>1</td><td>2</td><td>3</td><td>4</td></tr>
+   *  <tr><th>  A</th><th> HAR</th><td>2</td><td>1</td><td>6</td><td>5</td></tr>
+   *  <tr><th>  B</th><th> YAL</th><td>3</td><td>4</td><td>5</td><td>6</td></tr>
+   *  <tr><th>  B</th><th> HAR</th><td>4</td><td>3</td><td>2</td><td>1</td></tr>
+   *  <tr><th>  A</th><th> YAL</th><td>5</td><td>6</td><td>1</td><td>2</td></tr>
+   *  <tr><th>  B</th><th> MIT</th><td>6</td><td>5</td><td>4</td><td>3</td></tr>
+   * </table>
+   *
+   * @throws RotationBuilderException if the array sizes are not
+   * equal, or if the information is incomplete
+   */
+  public void fillCombinedRotation(Rotation rotation,
+				   RotationType type,
+				   Team [] teams,
+				   Division [] divisions,
+				   Sail [] sails,
+				   Integer [] raceNums,
+				   int setSize) throws RotationBuilderException {
+    int length = teams.length;
+    if (divisions.length != length)
+      throw new RotationBuilderException("Number of divisions does not match that of teams");
+    if (sails.length != length)
+      throw new RotationBuilderException("Number of sails does not match that of teams");
+
+    Sail [] sailCopy = new Sail[length];
+    for (int i = 0; i < length; i++)
+      sailCopy[i] = sails[i];
+
+    int num;
+    Division div;
+    Team team;
+    Sail sail;
+    int r = 0;
+    int numRaces = raceNums.length;
+    int setNum = 0;
+    while (r < numRaces) {
+      setNum++;
+      for (int j = 0; j < setSize && r < numRaces; j++) {
+	num = raceNums[r];
+	for (int i = 0; i < length; i++) {
+	  div = divisions[i];
+	  team = teams[i];
+	  sail = sails[i];
+	  rotation.setSail(new Race(div, num), team, sail);
+	}
+	r++;
+      }
+      
+      // shift or swap, accordingly
+      if (type == RotationType.STANDARD) {
+	Sail first = sails[0];
+	for (int j = 0; j < length - 1; j++) {
+	  sails[j] = sails[j + 1];
+	}
+	sails[length - 1] = first;
+      }
+      else if (type == RotationType.SWAP) {
+	for (int j = 0; j < length; j++) {
+	  if (j % 2 == 0) // move up
+	    sails[j] = sailCopy[(j + setNum) % length];
+	  else
+	    sails[j] = sailCopy[(j - setNum + length) % length];
+	}
+      }
+    }
+  }
+
+  /**
    * Actually creates the rotation. Children of this class should
    * override this method instead of overriding "update".
    *
-   * @return a <code>Rotation</code>.
    */
   public void fillRotation(Rotation rotation,
 			   RotationType type,
@@ -217,6 +299,32 @@ public class ICSARotationBuilder {
     ICSARotationBuilder rotManager = new ICSARotationBuilder(4);
     Rotation rot = new Rotation();
     try {
+      rotManager.fillCombinedRotation(rot,
+				      RotationType.SWAP,
+				      new Team [] {new Team("MIT"),
+						   new Team("HAR"),
+						   new Team("YAL"),
+						   new Team("HAR"),
+						   new Team("YAL"),
+						   new Team("MIT")},
+				      new Division [] {Division.A,
+						       Division.A,
+						       Division.B,
+						       Division.B,
+						       Division.A,
+						       Division.B},
+				      new Sail [] {new Sail("1"),
+						   new Sail("2"),
+						   new Sail("3"),
+						   new Sail("4"),
+						   new Sail("5"),
+						   new Sail("6")},
+				      new Integer [] {1, 2, 3, 4},
+				      2);
+
+      rot.dump();
+      System.exit(0);
+
       rotManager.fillRotation(rot,
 			      RotationType.STANDARD,
 			      RotationStyle.FRANNY,

@@ -52,8 +52,8 @@ public class Rotation {
   }
 
   // Private variables
-  Map<Race, Map<Team, Sail>> rot;
-  Set<Team> teamSet;
+  private Map<Race, Map<Team, Sail>> rot;
+  private Set<Team> teamSet;
 
   /**
    * Creates a new <code>Rotation</code> instance.

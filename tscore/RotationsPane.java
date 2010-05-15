@@ -32,15 +32,14 @@ import javax.swing.event.ChangeListener;
 import regatta.Race;
 import regatta.Regatta;
 import regatta.Regatta.Division;
-import regatta.RegattaEvent;
+import regatta.Regatta.RegattaScoring;
 import regatta.Rotation;
 import regatta.Rotation.RotationStyle;
 import regatta.Rotation.RotationType;
 import regatta.Sail;
 import regatta.Team;
-import javax.swing.SpinnerModel;
 import java.util.List;
-import regatta.Regatta.RegattaScoring;
+import java.util.Arrays;
 
 /**
  * The pane where rotations get created/edited.
@@ -69,18 +68,31 @@ import regatta.Regatta.RegattaScoring;
 public class RotationsPane extends AbstractPane
   implements ActionListener, ChangeListener {
 
+  // Sorting options
+  private enum SortingOption {
+    NO_SORTING("Do not sort"),
+      ALPHANUMERIC("Alphanumerically");
+    private String name;
+    SortingOption(String n) {
+      this.name = n;
+    }
+    public String toString() {
+      return this.name;
+    }
+  };
+
   // Private variables
   private JPanel paramPanel;
-  private JComboBox typeField, styleField;
+  private JComboBox typeField, styleField, sortingField;
   private JSpinner setSizeField;
   private JLabel offsetLabel;
   private JComponent offsetField;
   private JTextField raceField;
   private JList divisionField;
   private ArrayList<SailSpinner> sails;
-  private CreateRotationAction cAction;
+  private AbstractAction cAction;
   private DeleteRotationAction dAction;
-  private RotationFactory rotFactory = null;
+  private ICSARotationBuilder builder = new ICSARotationBuilder();
 
   /**
    * Creates a new <code>RotationsPane</code> instance.
@@ -134,6 +146,8 @@ public class RotationsPane extends AbstractPane
     //  -Type
     Team [] teams = this.regatta.getTeams();
     int numTeams = teams.length;
+    if (regatta.getScoring() == RegattaScoring.COMBINED)
+      numTeams *= divisions.length;
     JLabel label = Factory.label("Type:");
     ArrayList<RotationType> types = new ArrayList<RotationType>(4);
     for (RotationType t: RotationType.values()) {
@@ -152,14 +166,14 @@ public class RotationsPane extends AbstractPane
     paramPanel.add(typeField, c2);
 
     //   -Style
-    int divNum = this.regatta.getNumDivisions();
+    int divNum = divisions.length;
     c1.gridy++; c2.gridy++;
     label = Factory.label("Style:");
     styleField = new JComboBox(RotationStyle.values());
     styleField.addActionListener(this);
     paramPanel.add(label, c1);
     paramPanel.add(styleField, c2);
-    if (divNum == 1) {
+    if (divNum == 1 || this.regatta.getScoring() == RegattaScoring.COMBINED) {
       label.setVisible(false);
       styleField.setVisible(false);
     }
@@ -206,10 +220,16 @@ public class RotationsPane extends AbstractPane
     paramPanel.add(label, c1);
     paramPanel.add(divisionField, c2);
     // hide if no more than one division
-    if (divNum == 1) {
+    if (divNum == 1 || this.regatta.getScoring() == RegattaScoring.COMBINED) {
       label.setVisible(false);
       divisionField.setVisible(false);
     }
+    //      -Sorting of sails
+    c1.gridy++; c2.gridy++;
+    label = Factory.label("Sort sails first:");
+    sortingField = new JComboBox(SortingOption.values());
+    paramPanel.add(label, c1);
+    paramPanel.add(sortingField, c2);
 
 
     //- Boat panel contents: in the case of combined divisions, add
@@ -294,7 +314,10 @@ public class RotationsPane extends AbstractPane
     p1.anchor = GridBagConstraints.LINE_START;
     p2.anchor = GridBagConstraints.LINE_END;
 
-    this.cAction = new CreateRotationAction();
+    if (this.regatta.getScoring() == RegattaScoring.STANDARD)
+      this.cAction = new CreateRotationAction();
+    else
+      this.cAction = new CreateCombinedRotationAction();
     this.dAction = new DeleteRotationAction();
     this.add(new JButton(this.dAction), p1);
     this.add(new JButton(this.cAction), p2);
@@ -306,10 +329,12 @@ public class RotationsPane extends AbstractPane
    *
    */
   private void updateOffsetFieldView() {
+    if (this.regatta.getScoring() == RegattaScoring.COMBINED) return;
     RotationStyle style =
       (RotationStyle)this.styleField.getSelectedItem();
-    this.offsetLabel.setVisible(style == RotationStyle.FRANNY);
-    this.offsetField.setVisible(style == RotationStyle.FRANNY);
+    boolean display = (style == RotationStyle.FRANNY);
+    this.offsetLabel.setVisible(display);
+    this.offsetField.setVisible(display);
     this.paramPanel.revalidate();
     this.paramPanel.repaint();
   }
@@ -359,18 +384,17 @@ public class RotationsPane extends AbstractPane
    * Actions
    */
   class CreateRotationAction extends AbstractAction {
-    private ICSARotationBuilder builder = new ICSARotationBuilder();
 
     CreateRotationAction() {
       super("Set rotation");
       putValue(SHORT_DESCRIPTION, "Create/replace rotation.");
     }
     public void actionPerformed(ActionEvent ev) {
+
       // Style and type, and set size
       RotationType type = (RotationType)typeField.getSelectedItem();
       RotationStyle style =
 	(RotationStyle)styleField.getSelectedItem();
-      RegattaScoring scoring = this.regatta.getScoring();
       SpinnerNumberModel sm = (SpinnerNumberModel)setSizeField.getModel();
       int setSize = sm.getNumber().intValue();
 
@@ -419,11 +443,86 @@ public class RotationsPane extends AbstractPane
 	regatta.setRotation(rot);
 	fill();
       } catch (RotationBuilderException e) {
-	System.out.println("Unable to create rotation: " + e.getMessage());
+	System.err.println("Unable to create rotation: " + e.getMessage());
       }
-
     }
   }
+
+  /**
+   * Like <code>CreateRotationAction</code> but tailored for combined
+   * divisions
+   *
+   * @author Dayan Paez
+   * @version 2010-05-13
+   */
+  class CreateCombinedRotationAction extends AbstractAction {
+    public CreateCombinedRotationAction() {
+      super("Set rotation");
+    }
+    
+    public void actionPerformed(ActionEvent evt) {
+      RotationType type = (RotationType)typeField.getSelectedItem();
+      SpinnerNumberModel sm = (SpinnerNumberModel)setSizeField.getModel();
+      SortingOption sort = (SortingOption)sortingField.getSelectedItem();
+      int setSize = sm.getNumber().intValue();
+
+      // Create list of teams, sails and divisions
+      int length = RotationsPane.this.sails.size();
+      Sail [] sails = new Sail[length];
+      Team [] teams = new Team[length];
+      Division [] divs = new Division[length];
+
+      int i = 0;
+      for (Division d : regatta.getDivisions()) {
+	for (Team t : regatta.getTeams()) {
+	  divs[i] = d;
+	  teams[i]= t;
+	  i++;
+	}
+      }
+      // populate sails
+      for (i = 0; i < length; i++) {
+	sails[i] = (Sail)RotationsPane.this.sails.get(i).getValue();
+      }
+
+      // Sort the sails, teams, and divisions accordingly
+      if (sort == SortingOption.ALPHANUMERIC) {
+	List<Sail> sList = Arrays.asList(sails);
+	List<Team> tList = Arrays.asList(teams);
+	List<Division> dList = Arrays.asList(divs);
+	
+	Factory.multiSort(sList, tList, dList);
+
+	sails = sList.toArray(sails);
+	teams = tList.toArray(teams);
+	divs  = dList.toArray(divs);
+      }
+
+      // create list of races
+      Integer [] nums = Factory.parseList(raceField.getText().trim());
+      if (nums.length == 0) {
+	return;
+      }
+      Rotation rot = regatta.getRotation();
+      if (rot == null) {
+	rot = new Rotation();
+      }
+      try {
+	builder.fillCombinedRotation(rot,
+				     type,
+				     teams,
+				     divs,
+				     sails,
+				     nums,
+				     setSize);
+	regatta.setRotation(rot);
+	fill();
+      } catch (RotationBuilderException e) {
+	System.err.println("Unable to create rotation: " + e.getMessage());
+      }
+    }
+  }
+  
 
   class DeleteRotationAction extends AbstractAction {
     DeleteRotationAction() {
