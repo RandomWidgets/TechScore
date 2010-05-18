@@ -1,22 +1,23 @@
 package regatta;
 
 import java.util.ArrayList;
-import java.util.Set;
-import java.util.Iterator;
-import java.util.TreeMap;
-import regatta.Regatta.Division;
-import regatta.Rotation.RotationType;
-import regatta.Rotation.RotationStyle;
-import java.util.TreeSet;
-import java.util.Map;
-import java.util.List;
-import java.util.HashSet;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
+import regatta.Regatta.Division;
+import regatta.Rotation.RotationStyle;
+import regatta.Rotation.RotationType;
 
 /**
  * Rotations manage the sails that each team is racing in for a given
  * race. This class manages those subscriptions. For this version,
  * there is no need for sails to be integers.
+ * <p>
  *
  * Created: Tue Jun 16 10:05:27 2009
  *

@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.Enumeration;
 import java.util.List;
@@ -27,6 +28,7 @@ import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JLabel;
 import javax.swing.JList;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
@@ -35,18 +37,18 @@ import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-
 import regatta.Finish;
 import regatta.Race;
-import regatta.Regatta;
 import regatta.Regatta.Division;
 import regatta.Regatta.RegattaScoring;
-import regatta.RegattaEvent;
+import regatta.Regatta;
 import regatta.RegattaEvent.RegattaEventType;
+import regatta.RegattaEvent;
 import regatta.Rotation;
 import regatta.Sail;
 import regatta.Team;
 import tscore.FinishesPane.Using;
+import tscore.RaceSpinnerModel.CombinedRaceComparator;
 import tscore.RaceSpinnerModel.RaceComparator;
 
 /**
@@ -98,7 +100,7 @@ public class FinishesPane extends AbstractPane
       return this.name;
     }
   }
-  public static String NO_TEAM = "";
+  public static final String NO_TEAM = "";
 
   private RaceSpinnerModel raceSpinnerModel;
   private JComboBox usingCombo;
@@ -240,7 +242,6 @@ public class FinishesPane extends AbstractPane
   public void stateChanged(ChangeEvent evt) {
     Object source = evt.getSource();
     if (source == this.raceSpinnerModel) {
-      
       // Update the using combo to reflect the rotation state of this
       // race
       Using curChoice = (Using)this.usingCombo.getSelectedItem();
@@ -278,43 +279,46 @@ public class FinishesPane extends AbstractPane
   private void updateFinishPanel() {
 
     // Get race and entry type
+    RegattaScoring scoring = this.regatta.getScoring();
     Race race = this.raceSpinnerModel.getSelectedRace();
     Using use = (Using)this.usingCombo.getSelectedItem();
     Team [] teams = this.regatta.getTeams();
     int length = teams.length;
-    if (this.regatta.getScoring() == RegattaScoring.COMBINED)
+    if (scoring == RegattaScoring.COMBINED)
       length *= this.regatta.getDivisions().length;
 
     // If the race has already been scored, "postList" will have those
     // selections in the order they were entered. Otherwise, it will
     // be empty. "preList" contains the sails or teams in
     // numerical or alphabetical order.
-    Finish [] preTeam, postTeam;
+    FinishListItem [] preTeam, postTeam;
     
     // If race has been scored, rewrite those values, otherwise, list
     // the teams/sails for a new race.
     boolean isScored =
       Arrays.binarySearch(this.regatta.getFinishedRaces(), race) >= 0;
     if (isScored) {
-      preTeam = new Finish[0];
-      postTeam = new Finish[length];
+      preTeam = new FinishListItem[0];
+      postTeam = new FinishListItem[length];
       Finish[] f = this.regatta.getFinishes(race);
       for (int i = 0; i < f.length; i++)
-	postTeam[i] = new FinishListItem(f[i], this.regatta.getScoring());
+	postTeam[i] = new FinishListItem(f[i], formatFinish(f[i], scoring));
     }
     else {
-      preTeam = new Finish[length];
-      postTeam = new Finish[0];
-      if (this.regatta.getScoring() == RegattaScoring.STANDARD) {
-	for (int i = 0; i < teams.length; i++)
-	  preTeam[i] = new FinishListItem(race, teams[i], this.regatta.getScoring());
+      preTeam = new FinishListItem[length];
+      postTeam = new FinishListItem[0];
+      if (scoring == RegattaScoring.STANDARD) {
+	for (int i = 0; i < teams.length; i++) {
+	  Finish f = new Finish(race, teams[i]);
+	  preTeam[i] = new FinishListItem(f, formatFinish(f, scoring));
+	}
       }
       else {
 	int i = 0;
 	for (Division d : this.regatta.getDivisions()) {
 	  for (Team t : teams) {
-	    preTeam[i] = new FinishListItem(this.regatta.getRace(d, race.getNumber()), t,
-					    this.regatta.getScoring());
+	    Finish f = new Finish(this.regatta.getRace(d, race.getNumber()), t);
+	    preTeam[i] = new FinishListItem(f, formatFinish(f, scoring));
 	    i++;
 	  }
 	}
@@ -331,17 +335,23 @@ public class FinishesPane extends AbstractPane
     // Translate if rotation in use
     if (use == Using.ROTATION) {
       Rotation rot = this.regatta.getRotation();
-      Sail [] preSail, postSail;
-      preSail  = new Sail [preTeam.length];
-      postSail = new Sail [postTeam.length];
       for (int i = 0; i < preTeam.length; i++) {
-	preSail[i] = rot.getSail(race, preTeam[i].getTeam());
+	Finish f = preTeam[i].getFinish();
+	Sail s = rot.getSail(f.getRace(), f.getTeam());
+	preTeam[i].setDisplay(s.toString());
       }
       for (int i = 0; i < postTeam.length; i++) {
-	postSail[i] = rot.getSail(race, postTeam[i].getTeam());
+	Finish f = postTeam[i].getFinish();
+	Sail s = rot.getSail(f.getRace(), f.getTeam());
+	postTeam[i].setDisplay(s.toString());
       }
-      this.lists = new JLinkedLists(preSail, postSail);
-
+      this.lists.orderFromList(new Comparator<FinishListItem>() {
+	  public int compare(FinishListItem f1, FinishListItem f2) {
+	    Sail s1 = new Sail(f1.toString());
+	    Sail s2 = new Sail(f2.toString());
+	    return s1.compareTo(s2);
+	  }
+	});
       fromTitle = "Sails";
     }
     sailList   = this.lists.getFromList();
@@ -431,12 +441,22 @@ public class FinishesPane extends AbstractPane
   private Race getNextUnscoredRace() {
     List<Race> allRaces = new ArrayList<Race>(Arrays.asList(this.regatta.getRaces()));
     Race lastRace = allRaces.get(allRaces.size() - 1);
-    allRaces.removeAll(Arrays.asList(this.regatta.getFinishedRaces()));
+
+    if (this.regatta.getScoring() == RegattaScoring.STANDARD)
+      allRaces.removeAll(Arrays.asList(this.regatta.getFinishedRaces()));
+    else {
+      for (Division d : this.regatta.getDivisions()) {
+	for (Race r : this.regatta.getFinishedRaces()) {
+	  allRaces.remove(new Race(d, r.getNumber()));
+	}
+      }
+    }
+
     if (allRaces.size() == 0) {
       return lastRace;
     }
     // Sort
-    Collections.sort(allRaces, new RaceSpinnerModel.RaceComparator());
+    Collections.sort(allRaces, new RaceSpinnerModel.CombinedRaceComparator());
     return allRaces.get(0);
   }
 
@@ -453,30 +473,13 @@ public class FinishesPane extends AbstractPane
     }
     
     public void actionPerformed(ActionEvent evt) {
-      // Race
-      Race race = FinishesPane.this.raceSpinnerModel.getSelectedRace();
 
-      int size = regatta.getTeams().length;
-      if (FinishesPane.this.regatta.getScoring() == RegattaScoring.COMBINED)
-	size *= regatta.getDivisions().length;
-      boolean usingRot = (usingCombo.getSelectedItem() == Using.ROTATION);
-      Rotation rot = null;
-      if (usingRot) {
-	rot = FinishesPane.this.regatta.getRotation();
-      }
-      
-      ArrayList<Finish> teams = new ArrayList<Finish>(size);
       DefaultListModel fModel =
 	(DefaultListModel)FinishesPane.this.lists.getToList().getModel();
+      ArrayList<Finish> teams = new ArrayList<Finish>(fModel.getSize());
       for (Enumeration e = fModel.elements(); e.hasMoreElements();) {
-	Object elem = e.nextElement();
-	if (elem instanceof Sail) {
-	  teams.add(new Finish(race, rot.getTeam(race, (Sail)elem)));
-	}
-	else {
-	  // Finish
-	  teams.add((Finish)elem);
-	}
+	FinishListItem elem = (FinishListItem)e.nextElement();
+	teams.add(elem.getFinish());
       }
 
       // Create timestamp
@@ -493,8 +496,10 @@ public class FinishesPane extends AbstractPane
       regatta.fireRegattaChange(new RegattaEvent(regatta,
 						 RegattaEventType.FINISH,
 						 this));
+
       // turn to the next race
-      raceSpinnerModel.setRace(FinishesPane.this.getNextUnscoredRace());
+      Race race = FinishesPane.this.getNextUnscoredRace();
+      raceSpinnerModel.setRace(race);
     }
   }
 
@@ -661,6 +666,20 @@ public class FinishesPane extends AbstractPane
       setupList(toList);
     }
 
+    /**
+     * Orders the sails in from list using the given Comparator
+     *
+     */
+    public void orderFromList(Comparator<FinishListItem> comp) {
+      DefaultListModel model = (DefaultListModel)this.fromList.getModel();
+      FinishListItem [] obj  = new FinishListItem[model.getSize()];
+      model.copyInto(obj);
+      Arrays.sort(obj, comp);
+      for (int i = 0; i < obj.length; i++) {
+	model.setElementAt(obj[i], i);
+      }
+    }
+
     private void setupList(JList list) {
       list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
       DefaultListCellRenderer lr = new DefaultListCellRenderer();
@@ -753,5 +772,50 @@ public class FinishesPane extends AbstractPane
       // complete set of finishes, so disable the enterfinish button
       FinishesPane.this.enterAction.setEnabled(false);
     }
+  }
+
+  /**
+   * Prompts for entering finishes if necessary and enter finishes
+   *
+   * @return false if pane is not ready to be closed
+   */
+  public boolean empty() {
+    int n;
+    // n = this.lists.getToList().getModel().getSize();
+    // if (n > 0) {
+    if (this.enterAction.isEnabled()) {
+      Race race  = this.raceSpinnerModel.getSelectedRace();
+      String mes = String.format("Finishes for race %s have not yet been entered!\n\n" +
+				 "Enter finishes now?", race);
+      n = JOptionPane.showConfirmDialog(this, mes, "Pending finishes",
+					JOptionPane.YES_NO_CANCEL_OPTION,
+					JOptionPane.QUESTION_MESSAGE);
+      if (n == JOptionPane.CANCEL_OPTION) {
+	return false;
+      }
+      else if (n == JOptionPane.YES_OPTION) {
+	this.enterAction.actionPerformed(new ActionEvent(this, 0, "Update before cloing"));
+      }
+    }
+    return true;
+  }
+
+  /**
+   * Returns "Div: Team Name" for combined division scoring, and just
+   * the team name otherwise.
+   *
+   * @param Finish the finish to format
+   * @return the formatted string
+   */
+  private String formatFinish(Finish f, RegattaScoring mode) {
+    Team t = f.getTeam();
+    if (mode == RegattaScoring.COMBINED)
+      return String.format("%s: %s %s",
+			   f.getRace().getDivision(),
+			   t.getLongname(),
+			   t.getShortname());
+    return String.format("%s %s",
+			 t.getLongname(),
+			 t.getShortname());
   }
 }

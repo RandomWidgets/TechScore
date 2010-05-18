@@ -12,13 +12,15 @@ import tscore.PaneChangeEvent.About;
 
 
 /**
- * AbstractPane is the parent class of all editing panes in
- * TechScore. It extends the <code>JPanel</code> class and provides
- * methods for setting the panel's regatta. *
+ * Parent class of all editing panes in TechScore. It extends the
+ * <code>JPanel</code> class and provides methods for setting the
+ * panel's regatta.
+ * <p>
  *
  * Each object is created with a title and a regatta, and AbstractPane
  * adds itself as a RegattaListener. Children of AbstractPane must
  * take care to implement the regattaChange method.
+ * <p>
  *
  * This file is part of TechScore.
  * 
@@ -39,6 +41,7 @@ import tscore.PaneChangeEvent.About;
  *
  * @author <a href="mailto:dayan@paez.mit.edu">Dayan Paez</a>
  * @version 1.0
+ * @since 1.4   Provide an implied method when closing the pane
  */
 public abstract class AbstractPane
   extends JPanel
@@ -75,6 +78,21 @@ public abstract class AbstractPane
    * Fills the components, to be declared by children.
    */
   public void fill() {};
+
+  /**
+   * Frees the resources held by this pane and commits any pending
+   * actions. Return value indicates whether the pane should be
+   * removed or not.
+   * <p>
+   * Children of this class are strongly recommended to override this
+   * method to complete whatever actions remain. This method ALWAYS
+   * returns true.
+   *
+   * @return true if the pane is ready to be removed, false otherwise
+   */
+  public boolean empty() {
+    return true;
+  }
 
   /**
    * Returns whether or not this Pane/Action is enabled

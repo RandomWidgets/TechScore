@@ -126,6 +126,7 @@ public class ScoresDialog
     this.parent.doScore();
     Scorer scorer = this.parent.getScorer();
     Team [] teams    = scorer.rank(this.regatta);
+
     Map<Team, String> explanations = scorer.getRankExplanations();
     List<String> priorExplanations = new ArrayList<String>();
     Division [] divs = this.regatta.getDivisions();

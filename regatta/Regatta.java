@@ -1,25 +1,26 @@
 package regatta;
 
-import java.util.Date;
-import regatta.Regatta.Division;
-import java.util.TreeSet;
+
+import java.util.AbstractMap;
 import java.util.ArrayList;
-import regatta.RegattaEvent.RegattaEventType;
-import java.util.HashMap;
-import java.util.Set;
-import java.util.Iterator;
-import java.util.HashSet;
+import java.util.Arrays;
+import java.util.Calendar;
 import java.util.Collection;
-import java.util.TreeMap;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
 import regatta.Penalty.PenaltyType;
 import regatta.Penalty;
-import java.util.Calendar;
-
-import java.util.List;
-import java.util.Arrays;
 import regatta.RP.BoatRole;
-import java.util.Collections;
+import regatta.Regatta.Division;
+import regatta.RegattaEvent.RegattaEventType;
 
 /**
  * Encapsulates sailing regatta objects.
@@ -76,12 +77,12 @@ public class Regatta {
   private Map<Race, Set<Finish>> finishes;
   private Rotation rotation = null;
   private RP rp = null;
-
+  
   private Map<Division, Map<Team, TeamPenalty>> teamPenaltyMap;
 
   // 2010-05-03: Support for daily summaries
-  private Map<Date, String> blurbs;
-  
+  private TreeMap<Date, String> blurbs;
+  private Calendar myCal;
 
   /**
    * Creates a new <code>Regatta</code> instance.
@@ -104,6 +105,7 @@ public class Regatta {
     numRaces     = 0;
 
     this.blurbs = new TreeMap<Date, String>();
+    myCal = Calendar.getInstance();;
   }
 
   // Regatta fields
@@ -207,6 +209,14 @@ public class Regatta {
    * @deprecated use <code>getBlurb(Date d)</code> instead
    */
   public String getBlurb() {return this.getBlurb(this.getStartTime());}
+  /**
+   * Fetches a copy of the daily comments ordered by their dates.
+   *
+   * @return a map of <code>Date</code> to <code>String</code> values
+   */
+  public Map<Date, String> getBlurbs() {
+    return (Map<Date, String>)this.blurbs.clone();
+  }
 
   // Daily summaries
   /**
@@ -217,20 +227,31 @@ public class Regatta {
    * @throws IllegalArgumentException if invalid date
    */
   public void setBlurb(Date d, String s) {
-    this.blurbs.put(d, s);
+    myCal.setTime(d);
+    myCal.set(Calendar.HOUR, 0);
+    myCal.set(Calendar.MINUTE, 0);
+    myCal.set(Calendar.SECOND, 0);
+    this.blurbs.put(myCal.getTime(), s);
     this.fireRegattaChange(RegattaEventType.DETAILS);
   }
 
   /**
-   * Fetches the summary for the given day of competition
+   * Fetches the summary for the given day of competition (ignores the
+   * time portion of the date)
    *
    * @param d the day of compeitition
    * @return the summary (blurb)
    */
   public String getBlurb(Date d) {
-    String b = this.blurbs.get(d);
-    if (b == null) return "";
-    return b;
+    Calendar otCal = Calendar.getInstance();
+    otCal.setTime(d);
+    for (Date e : this.blurbs.keySet()) {
+      myCal.setTime(e);
+      if (myCal.get(Calendar.DAY_OF_YEAR) == otCal.get(Calendar.DAY_OF_YEAR) &&
+	  myCal.get(Calendar.YEAR)        == otCal.get(Calendar.YEAR))
+	return this.blurbs.get(e);
+    }
+    return "";
   }
 
   /*

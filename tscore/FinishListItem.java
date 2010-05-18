@@ -1,14 +1,12 @@
 package tscore;
 
 import regatta.Finish;
-import regatta.Regatta.RegattaScoring;
 import regatta.Race;
 import regatta.Team;
 
 /**
- * Extends regatta.Finish for displaying in lists such as
- * JLinkedLists. Takes care of displaying correctly depending on
- * Regatta scoring
+ * Thin wrapper around <code>regatta.Finish</code>. Controls the
+ * display using <code>toString</code> method.
  *
  * This file is part of TechScore.
  * 
@@ -31,16 +29,20 @@ import regatta.Team;
  * @author <a href="mailto:dayan@marti">dpv</a>
  * @version 1.0
  */
-public class FinishListItem extends Finish {
+public class FinishListItem implements Comparable<FinishListItem> {
 
-  private RegattaScoring mode;
+  private Finish finish;
+  private String display;
 
   /**
    * Creates a new <code>FinishListItem</code> instance.
    *
+   * @param finish the finish to represent
+   * @param display the text to display
    */
-  public FinishListItem(Finish fin, RegattaScoring mode) {
-    this(fin.getRace(), fin.getTeam(), mode);
+  public FinishListItem(Finish finish, String display) {
+    this.finish = finish;
+    this.display = display;
   }
 
   /**
@@ -48,10 +50,10 @@ public class FinishListItem extends Finish {
    *
    * @param race the race in question
    * @param team the team in question
+   * @param display the text to display
    */
-  public FinishListItem(Race race, Team team, RegattaScoring mode) {
-    super(race, team);
-    this.mode = mode;
+  public FinishListItem(Race race, Team team, String display) {
+    this(new Finish(race, team), display);
   }
 
   /**
@@ -61,11 +63,32 @@ public class FinishListItem extends Finish {
    * @return the String representation
    */
   public String toString() {
-    if (this.mode == RegattaScoring.COMBINED) {
-      return String.format("%s: %s",
-			   this.getRace().getDivision(),
-			   this.getTeam().toString());
-    }
-    return this.getTeam().toString();
+    return this.display;
+  }
+
+  /**
+   * Fetches the finish this item represents
+   *
+   * @return the finish
+   */
+  public Finish getFinish() {
+    return this.finish;
+  }
+
+  /**
+   * Sets the text to display
+   *
+   * @param display the new text to display
+   */
+  public void setDisplay(String display) {
+    this.display = display;
+  }
+
+  /**
+   * Delegates comparison to finish object
+   *
+   */
+  public int compareTo(FinishListItem other) {
+    return this.getFinish().compareTo(other.getFinish());
   }
 }

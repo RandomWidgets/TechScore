@@ -252,7 +252,6 @@ public class ICSAScorer implements Scorer {
 
     // Order
     Factory.multiSort(totalList, teamList);
-
     // Fill explanations with default
     this.rankExplanations = new HashMap<Team, String>(teamList.size());
     for (Team team : teamList) {

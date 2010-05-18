@@ -1,32 +1,33 @@
 package tscore;
 
+
 import java.awt.Dimension;
+import java.awt.Insets;
 import java.awt.event.FocusListener;
+import java.io.File;
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import javax.swing.Action;
 import javax.swing.ImageIcon;
+import javax.swing.JButton;
 import javax.swing.JComponent;
-import javax.swing.JFormattedTextField;
 import javax.swing.JFormattedTextField.AbstractFormatter;
+import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
+import javax.swing.JSpinner;
 import javax.swing.JTextField;
+import javax.swing.SpinnerModel;
 import javax.swing.SpringLayout;
 import javax.swing.SwingConstants;
-
 import regatta.Race;
-import regatta.Regatta;
 import regatta.Regatta.Division;
-import javax.swing.JButton;
-import javax.swing.Action;
-import java.awt.Insets;
-import java.io.File;
-import javax.swing.JSpinner;
-import javax.swing.SpinnerModel;
-import java.util.Comparator;
+import regatta.Regatta;
 
 /**
  * Provides static methods for creating components
@@ -271,7 +272,7 @@ public class Factory {
       else {
 	copy1.add(obj2);
 	for (int k = 0; k < num; k++) {
-	  copy2[k].add(half22[k].get(k));
+	  copy2[k].add(half22[k].get(j));
 	}
 	j++;
       }
@@ -445,17 +446,52 @@ public class Factory {
     return ext;
   }
 
+  /**
+   * Compares two version strings, like a <code>Comparator</code>. The
+   * versions are assumed to be of the form X.Y.Z, where X, Y and Z
+   * are all numbers which can be nested to any depth
+   *
+   * @param v1 the first version
+   * @param v2 the second version
+   * @return -1 if the first is earlier version
+   * @return  0 if the two versions are the "same"
+   * @return  1 if the first is a later version
+   * @throws ParseException should the strings be invalid
+   */
+  public static int compareVersions(String v1, String v2)
+    throws ParseException {
+    
+    if (v1.equals(v2)) return 0;
+      
+    // Split each string at the dots
+    String [] num1 = v1.split("\\.");
+    String [] num2 = v2.split("\\.");
+
+    for (int i = 0; i < num1.length && i < num2.length; i++) {
+      try {
+	int n1 = Integer.parseInt(num1[i]);
+	int n2 = Integer.parseInt(num2[i]);
+	if (n1 != n2)
+	  return n1 - n2;
+      } catch (Exception e) {
+	String mes = String.format("Invalid version strings to compare: %s vs. %s", v1, v2);
+	throw new ParseException(mes, i);
+      }
+    }
+    // at this point, both nums have the same "base", but one contains
+    // more revisions than the other: 1.3.4 vs. 1.3
+    if (num1.length < num2.length)
+      return -1;
+    return 1;
+  }
+
   // Main method
   public static void main (String [] args) {
-    Integer [] intList = {new Integer(4),
-			  new Integer(3),
+    Integer [] intList = {new Integer(6),
 			  new Integer(5),
-			  new Integer(1),
-			  new Integer(6),
-			  new Integer(9)};
+			  new Integer(4)};
 
-    String []  enuList = {"Fourth", "Third", "Fifth", "First",
-			  "Sixth",  "Tenth"};
+    String []  enuList = {"Sixth", "Fifth", "Fourth"};
     
     List<Integer> ints = Arrays.asList(intList);
     List<String>  strs = Arrays.asList(enuList);

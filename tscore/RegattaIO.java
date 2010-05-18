@@ -1,3 +1,20 @@
+/*
+ * This file is part of TechScore.
+ * 
+ * TechScore is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * TechScore is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with TechScore.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
 package tscore;
 
 import java.beans.PropertyChangeEvent;
@@ -63,43 +80,30 @@ import regatta.TeamPenalty.TeamPenaltyType;
 import regatta.Regatta.RegattaScoring;
 
 /**
- * Manages a regatta connection to a file. When the regatta is loaded,
- * the information describing its teams (id), etc, are saved, so that
- * when the time comes to save the file back, all the original
+ * <p>Manages a regatta connection to a file. When the regatta is
+ * loaded, the information describing its teams (id), etc, are saved,
+ * so that when the time comes to save the file back, all the original
  * information is kept intact. This helps keep data from being lost.
+ * </p>
  *
- * RegattaIO objects can inform registered propertyChangeListeners of
- * the progress being made.
+ * <p>RegattaIO objects can inform registered propertyChangeListeners
+ * of the progress being made.</p>
  *
  * <h2>Temporary RP database</h2>
  *
- * When a regatta is loaded, a database for the RP information is
+ * <p>When a regatta is loaded, a database for the RP information is
  * created in a directory specified by the client user. This database
  * consists of tab-delimited files, one for each different affiliation
- * found in the regatta. The format is:
+ * found in the regatta. The format is:</p>
  *
  * <code>ID	Name	Year	New?</code>
  *
- * Where the ID is as found in the regatta file, or created by the
+ * <p>Where the ID is as found in the regatta file, or created by the
  * client program. For speed, the flag <code>New</code> should be set
  * to <code>true</code>/<code>false</code> if the former or latter,
  * respectively. This speeds up the process of committing changes to
- * the database back to file when using the rewriteFile method.
- *
- * This file is part of TechScore.
- * 
- * TechScore is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- * 
- * TechScore is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- * 
- * You should have received a copy of the GNU General Public License
- * along with TechScore.  If not, see <http://www.gnu.org/licenses/>.
+ * the database back to file when using the {@link rewriteFile}
+ * method.</p>
  *
  * Created: Fri Jun 26 21:19:45 2009
  *
@@ -163,6 +167,9 @@ public class RegattaIO {
   /**
    * Writes a regatta to file by using the structure of inFile, and
    * saving to file outFile (which can be the same).
+   * <p>
+   * This function will attempt to update the format the file is saved
+   * to match the current version.
    *
    * @param reg a <code>Regatta</code> value
    * @param inFile a <code>File</code> value
@@ -181,7 +188,7 @@ public class RegattaIO {
       Element rootElement = doc.getDocumentElement();
       rootElement.normalize();
 
-      Element tag;
+      Element tag, subtag;
       Element text;
 
       // Version
@@ -215,14 +222,25 @@ public class RegattaIO {
       tag = getOrCreateElement(doc, rootElement, "RegattaScoring");
       this.replaceElementContent(tag, doc.createTextNode(textString));
 
-      // Blurb
-      textString = this.regatta.getBlurb();
-      if (textString == null) {
-	textString = "";
+      // Blurb:
+      // Replace version < 1.4 "Blurb" with "Comments" tree. This
+      // replaces the content of the "Comments" tag if it exists
+      tag = getOrCreateElement(doc, rootElement, "Comments");
+      while (tag.hasChildNodes())
+	tag.removeChild(tag.getFirstChild());
+      int day = 1;
+      Map<Date, String> blurbs = regatta.getBlurbs();
+      for (Date d : blurbs.keySet()) {
+	subtag = doc.createElement("Comment");
+	subtag.setAttribute("day", String.valueOf(day));
+	subtag.appendChild(doc.createTextNode(blurbs.get(d)));
+	tag.appendChild(subtag);
+	day++;
       }
-
-      tag = getOrCreateElement(doc, rootElement, "Blurb");
-      this.replaceElementContent(tag, doc.createTextNode(textString));
+      // Remove the "Blurb" element, if it exists
+      tag = getElement(rootElement, "Blurb");
+      if (tag != null)
+	rootElement.removeChild(tag);
 
       // Races and divisions
       rootElement.setAttribute("races", String.valueOf(this.regatta.getNumRaces()));
@@ -279,7 +297,6 @@ public class RegattaIO {
       Rotation rot = this.regatta.getRotation();
       if (rot != null) {
 	List<Node> sails = new ArrayList<Node>();
-	Element subtag;
 	Division [] divs = this.regatta.getDivisions();
 	for (int d = 0; d < divs.length; d++) {
 	  Race [] races = this.regatta.getRaces(divs[d]);
@@ -311,7 +328,6 @@ public class RegattaIO {
       List<Node> teamPenaltyNodes = new ArrayList<Node>();
       DateFormat tf = DateFormat.getTimeInstance(DateFormat.LONG);
       Race [] races = this.regatta.getFinishedRaces();
-      Element subtag;
       for (int i = 0; i < this.idList.size(); i++) {
 	String id = this.idList.get(i);
 	Team team = this.teamList.get(i);
@@ -567,10 +583,12 @@ public class RegattaIO {
   }
   
   /**
-   * Writes the regatta to a new file.
+   * Writes the regatta and the RP database to a new file.
    *
    * @param reg a <code>Regatta</code> to save to file
    * @param file a <code>File</code> to save in
+   * @param databaseDir the directory where the RP information is
+   * saved.
    * @return <code>true</code> upon success.
    */
   public boolean writeFile(Regatta reg, File file, File databaseDir) {
@@ -578,6 +596,7 @@ public class RegattaIO {
     try {
 
       // Create XML structure
+      XMLTag subtag;
       XMLTag root = new XMLTag("Regatta");
       root.addAttr("xmlns", "http://techscore.mit.edu");
       XMLTag tag = new XMLTag("RegattaName");
@@ -610,13 +629,17 @@ public class RegattaIO {
       tag.addAttr("class", "ICSA");
       root.add(tag);
 
-      tag = new XMLTag("Blurb");
-      String cont = this.regatta.getBlurb();
-      if (cont == null) {
-	cont = "";
-      }
-      tag.add(new XMLTextTag(this.regatta.getBlurb()));
+      // Starting with version 1.4, Blurb --> Comments
+      tag = new XMLTag("Comments");
       root.add(tag);
+      Map<Date, String> blurbs = this.regatta.getBlurbs();
+      int day = 1;
+      for (Date d : blurbs.keySet()) {
+	subtag = new XMLTag("Comment");
+	subtag.addAttr("day", String.valueOf(day));
+	subtag.add(new XMLTextTag(blurbs.get(d)));
+	day++;
+      }
 
       // Teams
       root.add(tag = new XMLTag("Teams"));
@@ -639,7 +662,6 @@ public class RegattaIO {
       // Rotations
       Rotation rot = this.regatta.getRotation();
       if (rot != null) {
-	XMLTag subtag;
 	tag = new XMLTag("Rotations");
 	root.add(tag);
 
@@ -673,7 +695,6 @@ public class RegattaIO {
 	for (Race race: races) {
 	  Finish finish = this.regatta.getFinish(race, team);
 	  if (finish != null) {
-	    XMLTag subtag;
 	    tag.add(subtag = new XMLTag("Finish"));
 	    subtag.addAttr("race", race.toString());
 	    subtag.addAttr("team", "t" + (teamIndex+1));
@@ -705,7 +726,6 @@ public class RegattaIO {
 	}
 	// Team penalty?
 	TeamPenalty pen;
-	XMLTag subtag;
 	for (Division d : this.regatta.getDivisions()) {
 	  pen = this.regatta.getTeamPenalty(d, team);
 	  if (pen != null) {
@@ -753,7 +773,7 @@ public class RegattaIO {
 	for (int t = 0; t < teams.length; t++) {
 	  Team team = teams[t];
 	  for (Division div : divs) {
-	    XMLTag subtag, name, year;
+	    XMLTag name, year;
 	    Race [] subRaces;
 	    Integer [] nums;
 	    for (BoatRole role : BoatRole.values()) {
@@ -782,7 +802,7 @@ public class RegattaIO {
 
       // RP Database
       root.add(tag = new XMLTag("Membership"));
-      XMLTag subtag, memtag, name, year;
+      XMLTag memtag, name, year;
       try {
 	for (File affFile : databaseDir.listFiles()) {
 	  tag.add(subtag = new XMLTag("Affiliate"));
@@ -845,14 +865,19 @@ public class RegattaIO {
   }
 
   // Reading from file
+  
   /**
    * Reads a file and creates a regatta object. If the file was read
    * without any problems, returns <code>true</code>. If there were
    * warnings, returns <code>false</code>. If there are unrecoverable
-   * errors, an exception is thrown. See <code>getRegatta</code>.
+   * errors, an exception is thrown.
+   * <p>
+   * Goes out of its way to understand previous versions of the file
+   * format.
    *
-   * @param f a <code>File</code> to read
+   * @param  f a <code>File</code> to read
    * @return <code>true</code> on success.
+   * @see    #getRegatta
    */
   public boolean readFile(File f, File databaseDir)
     throws IllegalArgumentException {
@@ -861,6 +886,7 @@ public class RegattaIO {
     warnings = new LinkedHashSet<String>();
     regatta = null;
     DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+    NodeList nl, snl;
     try {
       this.notifyListeners("done", new Boolean(false));
 
@@ -955,19 +981,43 @@ public class RegattaIO {
 	}
       }
 
-      // Blurb
-      String blurb = getTagContent(root, "Blurb", true);
-      if (blurb == null) {
-	blurb = "";
-      }
-
       // CREATE REGATTA OBJECT
       regatta = new Regatta(name);
       regatta.setStartTime(dateValue);
       regatta.setType(theType);
       regatta.setScoring(theScoring);
       regatta.setDuration(duration);
-      regatta.setBlurb(blurb);
+
+      
+      // Blurb/Comments:
+      // version <  1.4: single blurb, assigned to first day of regatta
+      // version >= 1.4: one blurb per racing day
+      if (Factory.compareVersions(version, "1.4") < 0) {
+	String blurb = getTagContent(root, "Blurb", true);
+	if (blurb == null) blurb = "";
+	regatta.setBlurb(dateValue, blurb);
+      }
+      else {
+	nl = root.getElementsByTagName("Comments");
+	int len = nl.getLength();
+	if (len > 0) {
+	  // Use the last one
+	  Element comElem = (Element)nl.item(len - 1);
+	  snl = comElem.getElementsByTagName("Comment");
+	  cal.setTime(dateValue);
+	  for (int i = 0; i < snl.getLength(); i++) {
+	    try {
+	      Element comm = (Element)snl.item(i);
+	      String blurb = getTagContent(comm);
+	      int day = Integer.parseInt(comm.getAttribute("day"));
+	      cal.add(Calendar.DAY_OF_MONTH, (day - 1));
+	      regatta.setBlurb(cal.getTime(), blurb);
+	    } catch (Exception e) {
+	      warnings.add("Invalid daily summary found (" + i + ")");
+	    }
+	  }
+	}
+      }
 
       // Number of divisions and races
       String [] attr;
@@ -1009,7 +1059,6 @@ public class RegattaIO {
       }
 
       this.notifyListeners(prop, "Loading rotations");
-      NodeList nl;
       // ROTATIONS
       Rotation rot;
       nl = root.getElementsByTagName("Rotations");
@@ -1020,7 +1069,7 @@ public class RegattaIO {
 	rot = new Rotation();
 	// Use the last rotation
 	Element rotElem = (Element)nl.item(len - 1);
-	NodeList snl = rotElem.getElementsByTagName("Sail");
+	snl = rotElem.getElementsByTagName("Sail");
 	for (int i = 0; i < snl.getLength(); i++) {
 	  try {
 	    Element sail = (Element)snl.item(i);
@@ -1073,7 +1122,7 @@ public class RegattaIO {
       len = nl.getLength();
       if (len > 0) {
 	Element rotElem = (Element)nl.item(len - 1);
-	NodeList snl = rotElem.getElementsByTagName("Finish");
+	snl = rotElem.getElementsByTagName("Finish");
 	DateFormat tf = DateFormat.getTimeInstance(DateFormat.LONG);
 	for (int i = 0; i < snl.getLength(); i++) {
 	  try {
@@ -1123,7 +1172,7 @@ public class RegattaIO {
       len = nl.getLength();
       if (len > 0) {
 	Element rotElem = (Element)nl.item(len - 1);
-	NodeList snl = rotElem.getElementsByTagName("Penalty");
+	snl = rotElem.getElementsByTagName("Penalty");
 	for (int i = 0; i < snl.getLength(); i++) {
 	  try {
 	    Element finElem = (Element)snl.item(i);
@@ -1175,7 +1224,7 @@ public class RegattaIO {
       len = nl.getLength();
       if (len > 0) {
 	Element rotElem = (Element)nl.item(len - 1);
-	NodeList snl = rotElem.getElementsByTagName("Breakdown");
+	snl = rotElem.getElementsByTagName("Breakdown");
 	for (int i = 0; i < snl.getLength(); i++) {
 	  try {
 	    Element finElem = (Element)snl.item(i);
@@ -1240,7 +1289,7 @@ public class RegattaIO {
       len = nl.getLength();
       if (len > 0) {
 	Element rotElem = (Element)nl.item(len - 1);
-	NodeList snl = rotElem.getElementsByTagName("TeamPenalty");
+	snl = rotElem.getElementsByTagName("TeamPenalty");
 	for (int i = 0; i < snl.getLength(); i++) {
 	  try {
 	    Element finElem = (Element)snl.item(i);
@@ -1297,7 +1346,7 @@ public class RegattaIO {
 		fw = new FileWriter(new File(databaseDir, id));
 		out = new BufferedWriter(fw);
 		out.write("");
-		NodeList snl = e.getElementsByTagName("Member");
+		snl = e.getElementsByTagName("Member");
 		for (int j = 0; j < snl.getLength(); j++) {
 		  Element subE = (Element)snl.item(j);
 		  String sID = subE.getAttribute("id").trim();
@@ -1350,7 +1399,7 @@ public class RegattaIO {
 	RP rp = new RP();
 	regatta.setRP(rp);
 	Element rotElem = (Element)nl.item(len - 1);
-	NodeList snl = rotElem.getElementsByTagName("Sailor");
+	snl = rotElem.getElementsByTagName("Sailor");
 	Sailor sailor;
 	for (int i = 0; i < snl.getLength(); i++) {
 	  try {

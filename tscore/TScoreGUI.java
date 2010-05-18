@@ -81,7 +81,7 @@ public class TScoreGUI
   implements RegattaListener, WindowListener, PropertyChangeListener {
   
   // Static variables
-  public static String VERSION = "1.3.5";
+  public static String VERSION = "1.4";
   public static String FILE_EXTENSION = "tsr";
   public static String NAVY_EXTENSION = "sco";
 
@@ -211,12 +211,24 @@ public class TScoreGUI
 				     new TeamPenaltiesPane(this.regatta),
 				     new BreakdownsPane(this.regatta),
 				     rpPane, dbPane};
+    KeyStroke [] keys = {KeyStroke.getKeyStroke(KeyEvent.VK_F1, 0),
+			 KeyStroke.getKeyStroke(KeyEvent.VK_F2, 0),
+			 KeyStroke.getKeyStroke(KeyEvent.VK_F3, 0),
+			 KeyStroke.getKeyStroke(KeyEvent.VK_F4, 0),
+			 KeyStroke.getKeyStroke(KeyEvent.VK_F5, 0),
+			 KeyStroke.getKeyStroke(KeyEvent.VK_F6, 0),
+			 KeyStroke.getKeyStroke(KeyEvent.VK_F7, 0),
+			 KeyStroke.getKeyStroke(KeyEvent.VK_F8, 0),
+			 KeyStroke.getKeyStroke(KeyEvent.VK_F9, 0),
+			 KeyStroke.getKeyStroke(KeyEvent.VK_F10, 0),
+			 KeyStroke.getKeyStroke(KeyEvent.VK_F11, 0)};
+    
     EditPaneActionGroup group = new EditPaneActionGroup();
     
     EditPaneActionGroup. EditPaneAction [] paneActions =
       new EditPaneActionGroup.EditPaneAction[editPanes.length];
     for (int i = 0; i < editPanes.length; i++) {
-      paneActions[i] = group.new EditPaneAction(editPanes[i]);
+      paneActions[i] = group.new EditPaneAction(editPanes[i], keys[i]);
     }
 
     // Menu
@@ -891,30 +903,27 @@ public class TScoreGUI
   }
 
   class EditPaneActionGroup {
+    private EditPaneAction currentAction;
     private ArrayList<EditPaneAction> actions;
-    private int [] keys = {KeyEvent.VK_F1,
-			   KeyEvent.VK_F2,
-			   KeyEvent.VK_F3,
-			   KeyEvent.VK_F4,
-			   KeyEvent.VK_F5,
-			   KeyEvent.VK_F6,
-			   KeyEvent.VK_F7,
-			   KeyEvent.VK_F8,
-			   KeyEvent.VK_F9,
-			   KeyEvent.VK_F10};
-    private int keyIndex = 0;
-
+    
     public EditPaneActionGroup() {
+      this.currentAction = null;
       this.actions = new ArrayList<EditPaneAction>();
     }
 
     /**
      * Selects the specified action found in this group, while
-     * deselecting all others.
+     * deselecting all others. But first asks the current one if
+     * it's alright to do so.
      *
      * @param act an <code>EditPaneAction</code> value
      */
     public void select(EditPaneAction selectedAction) {
+      if (this.currentAction != null) {
+	if (!this.currentAction.getPane().empty())
+	  return;
+      }
+
       for (EditPaneAction act : this.actions) {
 	if (act == selectedAction) {
 	  act.setSelected(true);
@@ -922,14 +931,18 @@ public class TScoreGUI
 	else {
 	  act.setSelected(false);
 	}
-
       }
+      this.currentAction = selectedAction;
     }
 
     /**
      * Edit pane action. Each of these actions takes one AbstractPane
      * and its action is to set that pane as the content pane of the
      * main frame.
+     * <p>
+     *
+     * Meanwhile, if in so doing an existing pane is to be replaced,
+     * then first prompt for that pane's <code>empty</code> status.
      */
     class EditPaneAction extends AbstractAction
       implements PaneChangeListener {
@@ -937,6 +950,9 @@ public class TScoreGUI
       private AbstractPane editPane;
       private ArrayList<AbstractButton> components;
       EditPaneAction(AbstractPane p) {
+	this(p, null);
+      }
+      EditPaneAction(AbstractPane p, KeyStroke k) {
 	super(p.toString());
 	this.editPane = p;
 	this.editPane.addPaneChangeListener(this);
@@ -945,10 +961,7 @@ public class TScoreGUI
 	putValue(SHORT_DESCRIPTION, p.toString());
 	putValue(SMALL_ICON, p.getIcon());
 	putValue(Factory.SELECTED_KEY, new Boolean(false));
-	/*
-	putValue(ACCELERATOR_KEY,
-		 KeyStroke.getKeyStroke(keys[keyIndex++], 0));
-	*/
+	putValue(ACCELERATOR_KEY, k);
 
 	// Register this action with daddy
 	EditPaneActionGroup.this.actions.add(this);

@@ -1,9 +1,14 @@
 package tscore;
 
+
+
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.Date;
@@ -11,31 +16,28 @@ import java.util.Locale;
 import javax.swing.AbstractAction;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JComponent;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SpinnerNumberModel;
-import javax.swing.text.DateFormatter;
-
-import regatta.Regatta;
-import regatta.Regatta.RegattaType;
-import javax.swing.JOptionPane;
-import javax.swing.JComponent;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeEvent;
-
-import org.sourceforge.jcalendarbutton.*;
-import javax.swing.event.DocumentListener;
-import javax.swing.event.DocumentEvent;
-import java.awt.event.ActionListener;
-import javax.swing.event.ChangeListener;
+import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
+import javax.swing.text.DateFormatter;
+import org.sourceforge.jcalendarbutton.*;
 import org.sourceforge.jcalendarbutton.JCalendarButton;
 import org.sourceforge.jcalendarbutton.JTimeButton;
 import regatta.Regatta.RegattaScoring;
+import regatta.Regatta.RegattaType;
+import regatta.Regatta;
 
 /**
  * The main pane for editing regatta, this pane contains the details
@@ -76,6 +78,7 @@ public class DetailsPane
   private SpinnerNumberModel durationModel;
   private JComboBox typeField, scoringField;
   private JTextArea blurbField;
+  private JLabel infoLabel;
 
   /**
    * Creates a new <code>DetailsPane</code> instance.
@@ -239,29 +242,20 @@ public class DetailsPane
     this.add(label, c1);
     this.add(scoringField, c2);
 
-    //- Summary
-    c1.gridy++; c2.gridy++; c3.gridy++;
-    c2.weighty = 1.0;
-    label = Factory.label("Summary:");
-    blurbField = new JTextArea(regatta.getBlurb());
-    blurbField.setLineWrap(true);
-    JScrollPane blurbScroll = new JScrollPane(blurbField);
-    this.add(label, c1);
-    this.add(blurbScroll, c2);
+    //-  Spacer and messages pane
+    c1.gridy++;
+    c1.weighty = 1.0;
+    c1.gridwidth = 3;
+    this.infoLabel = new JLabel(this.getRegattaInfo(), SwingConstants.LEFT);
+    this.infoLabel.setVerticalAlignment(SwingConstants.TOP);
+    this.add(this.infoLabel, c1);
+  }
 
-    //- Button
-    c2.gridy++;
-    c2.gridwidth = 2;
-    c2.weighty = 0.0;
-    c2.anchor = GridBagConstraints.LINE_END;
-    c2.weightx = 0.0;
-    c2.fill = GridBagConstraints.NONE;
-    JButton button = new TButton(new AbstractAction("Edit Summary") {
-	public void actionPerformed(ActionEvent evt) {
-	  regatta.setBlurb(blurbField.getText().trim());
-	}
-      });
-    this.add(button, c2);
+  private String getRegattaInfo() {
+    StringBuilder text = new StringBuilder("<html>");
+    text.append("<strong>No. teams:</strong> " + this.regatta.getTeams().length + "<br>");
+    text.append("</html>");
+    return text.toString();
   }
 
   /**

@@ -63,6 +63,7 @@ public class RacesPane extends AbstractPane
 
   private JSpinner divSpinner, raceSpinner;
   private JScrollPane boatScroll, teamScroll;
+  private AddTeamAction latestAddTeamAction;  // keep track of team action to add
 
   /**
    * Creates a new <code>RacesPane</code> instance.
@@ -320,9 +321,10 @@ public class RacesPane extends AbstractPane
       teamPanel.add(new JLabel((teams.length+1) + "."), c1);
       JTextField l = new EditField("", 8);
       JTextField s = new EditField("", 5);
+      this.latestAddTeamAction = new AddTeamAction(l, s);
       teamPanel.add(l, c2);
       teamPanel.add(s, c3);
-      teamPanel.add(Factory.tightButton(new AddTeamAction(l, s)), c4);
+      teamPanel.add(Factory.tightButton(this.latestAddTeamAction), c4);
       l.requestFocusInWindow();
     }
     else {
@@ -341,6 +343,34 @@ public class RacesPane extends AbstractPane
     c2.gridwidth = 4;
     c2.weighty = 1.0;
     teamPanel.add(new JLabel(), c2);
+  }
+
+  /**
+   * If necessary, prompts to create any pending teams
+   *
+   * @return true if done, or false if more editing is required
+   */
+  public boolean empty() {
+    if (this.latestAddTeamAction == null)
+      return true;
+    
+    JTextField longField  = this.latestAddTeamAction.getLongNameField();
+    JTextField shortField = this.latestAddTeamAction.getShortNameField();
+    String longName  = longField.getText().trim();
+    if (longName.length() > 0) {
+      String shortName = shortField.getText().trim();
+      String mes = String.format("Create new team %s %s?\n\n", longName, shortName);
+      int n = JOptionPane.showConfirmDialog(this, mes, "Pending new team",
+					    JOptionPane.YES_NO_CANCEL_OPTION,
+					    JOptionPane.QUESTION_MESSAGE);
+      if (n == JOptionPane.CANCEL_OPTION) {
+	return false;
+      }
+      else if (n == JOptionPane.YES_OPTION) {
+	this.latestAddTeamAction.actionPerformed(new ActionEvent(this, 0, "Update prior to leaving"));
+      }
+    }
+    return true;
   }
 
   /**
@@ -379,7 +409,11 @@ public class RacesPane extends AbstractPane
       RacesPane.this.updateTeamPanel();
       // Scroll to bottom
       int max = teamScroll.getVerticalScrollBar().getMaximum();
-      teamScroll.getVerticalScrollBar().setValue(max);    }
+      teamScroll.getVerticalScrollBar().setValue(max);
+    }
+
+    public JTextField getLongNameField()  { return this.lName; }
+    public JTextField getShortNameField() { return this.sName; }
   }
 
   /**

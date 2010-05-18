@@ -1,16 +1,24 @@
 package tscore;
 
-import java.awt.event.ActionListener;
-import java.awt.event.ActionEvent;
-import regatta.Regatta;
-import java.awt.GridBagLayout;
-import javax.swing.JLabel;
 import java.awt.GridBagConstraints;
-import javax.swing.SpinnerDateModel;
-import javax.swing.JSpinner;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.Date;
-import javax.swing.JPanel;
+import java.util.Locale;
+import javax.swing.AbstractAction;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
+import javax.swing.JTextArea;
+import javax.swing.SpinnerListModel;
+import javax.swing.SpinnerModel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import regatta.Regatta;
 
 /**
  * Since regattas can be multi-day affairs, allow for daily
@@ -38,9 +46,13 @@ import javax.swing.JPanel;
  * @author <a href="mailto:dayan@marti">dpv</a>
  * @version 1.0
  */
-public class DailySummaryPane extends AbstractPane implements ActionListener {
+public class DailySummaryPane extends AbstractPane implements ChangeListener {
 
   private JSpinner daySpinner;
+  private JTextArea blurbField;
+  
+  private Date previousDate;    // track the date displayed
+  private DateFormat df;        // ...and its translator
 
   /**
    * Creates a new <code>DailySummaryPane</code> instance.
@@ -48,8 +60,8 @@ public class DailySummaryPane extends AbstractPane implements ActionListener {
    */
   public DailySummaryPane(Regatta reg) {
     super ("Daily Summaries");
-    this.setLayout (new GridBagLayout ());
-    this.setRegatta (reg);
+    this.setLayout(new GridBagLayout());
+    this.setRegatta(reg);
   }
 
   /**
@@ -64,46 +76,97 @@ public class DailySummaryPane extends AbstractPane implements ActionListener {
     // Day selector: spinner
     JLabel label;
     GridBagConstraints c1, c2;
+    Insets insets = new Insets(2,2,2,2);
     c1 = new GridBagConstraints ();
     c2 = new GridBagConstraints ();
     c1.gridx = 0;
     c2.gridx = 1;
+    c1.gridy = 0;
+    c2.gridy = 0;
     c1.weighty = 0.0;
     c2.weightx = 0.5;
     c2.fill = GridBagConstraints.HORIZONTAL;
+    c1.insets = insets;
+    c2.insets = insets;
 
-    label = Factory.label ("Day:");
-    Date start = this.regatta.getStartTime ();
+    // list of possible dates
+    this.df = DateFormat.getDateInstance(DateFormat.SHORT, Locale.US);
+    Date start = this.regatta.getStartTime();
+    String [] dates = new String[this.regatta.getDuration()];
+    dates[0] = df.format(start);
+    this.previousDate = start;
+    
     Calendar calendar = Calendar.getInstance ();
-    calendar.setTime (start);
-    calendar.add (Calendar.DATE, this.regatta.getDuration ());
-    SpinnerDateModel sm = new SpinnerDateModel(start, start, calendar.getTime (), Calendar.DATE);
-    this.daySpinner = new JSpinner (sm);
+    calendar.setTime(start);
+    for (int i = 1; i < dates.length; i++) {
+      calendar.add(Calendar.DATE, 1);
+      dates[i] = df.format(calendar.getTime());
+    }
+    
+    label = Factory.label ("Racing Day:");
+    SpinnerModel sm = new SpinnerListModel(dates);
+    this.daySpinner = new JSpinner(sm);
+    this.daySpinner.addChangeListener(this);
     this.add (label, c1);
     this.add (this.daySpinner, c2);
+
+    // Commit button
+    c1.gridy++;
+    c1.gridwidth = 2;
+    c1.fill = GridBagConstraints.BOTH;
+    this.add(new JButton(new AbstractAction("Set Summary") {
+	public void actionPerformed(ActionEvent evt) {
+	  commitBlurb();
+	}
+      }), c1);
 
     // Text area
     // spacer for now
     c1.gridy++;
-    c1.gridwidth = 2;
     c1.weighty = 1.0;
-    c1.fill = GridBagConstraints.BOTH;
-    this.add (new JPanel (), c1);
+    this.blurbField = new JTextArea(regatta.getBlurb(start));
+    this.blurbField.setLineWrap(true);
+    this.add(new JScrollPane(blurbField), c1);
   }
 
   public boolean isUsable () {
     return true;
   }
 
-  // Implementation of java.awt.event.ActionListener
+  /**
+   * Commits the blurb shown for the current date
+   *
+   */
+  private void commitBlurb() {
+    System.out.println(this.blurbField.getText());
+    this.regatta.setBlurb(this.previousDate, this.blurbField.getText().trim());
+  }
+
+  // Implementation of java.awt.event.ChangeListener
 
   /**
-   * Describe <code>actionPerformed</code> method here.
+   * Loads (and saves) the summary when user changes date
    *
    * @param actionEvent an <code>ActionEvent</code> value
    */
-  public final void actionPerformed(final ActionEvent actionEvent) {
+  public final void stateChanged(final ChangeEvent evt) {
 
+    // update previous date to the new value
+    try {
+      this.previousDate = this.df.parse((String)this.daySpinner.getValue());
+      this.blurbField.setText(this.regatta.getBlurb(this.previousDate));
+    } catch (Exception e) {
+      System.err.println("Unable to parse my own date? Please file bug report.");
+    }
   }
 
+  /**
+   * Commits the changes to the current blurb.
+   *
+   * @return true
+   */
+  public boolean empty() {
+    this.commitBlurb();
+    return true;
+  }
 }
