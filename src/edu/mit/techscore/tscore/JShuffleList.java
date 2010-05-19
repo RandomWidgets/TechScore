@@ -1,4 +1,4 @@
-package tscore;
+package edu.mit.techscore.tscore;
 
 import javax.swing.JList;
 import javax.swing.BorderFactory;

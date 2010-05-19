@@ -1,4 +1,4 @@
-package tscore;
+package edu.mit.techscore.tscore;
 
 /**
  * Prescribes a method that pane listeners must implement

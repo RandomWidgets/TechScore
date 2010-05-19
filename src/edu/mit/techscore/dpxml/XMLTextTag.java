@@ -1,4 +1,4 @@
-package dpxml;
+package edu.mit.techscore.dpxml;
 
 /**
  * For writing text values in XML file.

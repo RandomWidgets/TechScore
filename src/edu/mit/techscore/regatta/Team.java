@@ -1,4 +1,4 @@
-package regatta;
+package edu.mit.techscore.regatta;
 
 
 /**

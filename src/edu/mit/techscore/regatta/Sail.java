@@ -1,4 +1,4 @@
-package regatta;
+package edu.mit.techscore.regatta;
 
 /**
  * The sail a team uses in a given race. This can be a String. It can

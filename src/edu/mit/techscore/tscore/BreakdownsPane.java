@@ -1,4 +1,4 @@
-package tscore;
+package edu.mit.techscore.tscore;
 
 import regatta.Regatta;
 import javax.swing.SpringLayout;

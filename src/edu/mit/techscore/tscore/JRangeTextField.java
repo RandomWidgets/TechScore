@@ -1,4 +1,4 @@
-package tscore;
+package edu.mit.techscore.tscore;
 
 import javax.swing.JTextField;
 import javax.swing.JComponent;

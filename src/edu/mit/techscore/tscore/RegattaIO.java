@@ -15,7 +15,7 @@
  * along with TechScore.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-package tscore;
+package edu.mit.techscore.tscore;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;

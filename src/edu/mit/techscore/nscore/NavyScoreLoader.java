@@ -1,4 +1,4 @@
-package nscore;
+package edu.mit.techscore.nscore;
 
 import regatta.Regatta;
 import java.io.File;

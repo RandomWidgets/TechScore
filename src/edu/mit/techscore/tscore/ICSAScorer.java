@@ -1,4 +1,4 @@
-package tscore;
+package edu.mit.techscore.tscore;
 
 import java.io.BufferedReader;
 import java.io.File;
