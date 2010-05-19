@@ -13,13 +13,13 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 
-import regatta.Regatta;
-import regatta.Regatta.Division;
-import regatta.Team;
-import regatta.TeamPenalty;
-import regatta.TeamPenalty.TeamPenaltyType;
-import regatta.RegattaEvent;
-import regatta.RegattaEvent.RegattaEventType;
+import edu.mit.techscore.regatta.Regatta;
+import edu.mit.techscore.regatta.Regatta.Division;
+import edu.mit.techscore.regatta.Team;
+import edu.mit.techscore.regatta.TeamPenalty;
+import edu.mit.techscore.regatta.TeamPenalty.TeamPenaltyType;
+import edu.mit.techscore.regatta.RegattaEvent;
+import edu.mit.techscore.regatta.RegattaEvent.RegattaEventType;
 
 /**
  * Describe class TeamPenaltiesPane here.

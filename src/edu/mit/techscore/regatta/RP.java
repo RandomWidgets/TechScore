@@ -8,8 +8,8 @@ import java.util.TreeSet;
 import java.util.TreeMap;
 import java.util.Set;
 import java.util.HashSet;
-import regatta.RP.BoatRole;
-import regatta.Regatta.Division;
+import edu.mit.techscore.regatta.RP.BoatRole;
+import edu.mit.techscore.regatta.Regatta.Division;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 

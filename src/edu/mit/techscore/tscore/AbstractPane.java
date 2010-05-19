@@ -3,12 +3,12 @@ package edu.mit.techscore.tscore;
 import javax.swing.Action;
 import javax.swing.JPanel;
 import java.util.Vector;
-import regatta.RegattaListener;
-import regatta.Regatta;
-import regatta.RegattaEvent.RegattaEventType;
-import regatta.RegattaEvent;
+import edu.mit.techscore.regatta.RegattaListener;
+import edu.mit.techscore.regatta.Regatta;
+import edu.mit.techscore.regatta.RegattaEvent.RegattaEventType;
+import edu.mit.techscore.regatta.RegattaEvent;
 import javax.swing.Icon;
-import tscore.PaneChangeEvent.About;
+import edu.mit.techscore.tscore.PaneChangeEvent.About;
 
 
 /**

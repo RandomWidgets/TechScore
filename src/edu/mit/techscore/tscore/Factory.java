@@ -25,9 +25,9 @@ import javax.swing.JTextField;
 import javax.swing.SpinnerModel;
 import javax.swing.SpringLayout;
 import javax.swing.SwingConstants;
-import regatta.Race;
-import regatta.Regatta.Division;
-import regatta.Regatta;
+import edu.mit.techscore.regatta.Race;
+import edu.mit.techscore.regatta.Regatta.Division;
+import edu.mit.techscore.regatta.Regatta;
 
 /**
  * Provides static methods for creating components

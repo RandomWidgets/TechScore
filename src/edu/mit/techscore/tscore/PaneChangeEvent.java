@@ -1,6 +1,6 @@
 package edu.mit.techscore.tscore;
 
-import regatta.RegattaEvent.RegattaEventType;
+import edu.mit.techscore.regatta.RegattaEvent.RegattaEventType;
 
 /**
  * Encapsulates a pane change event.

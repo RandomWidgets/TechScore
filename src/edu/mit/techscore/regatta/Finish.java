@@ -2,7 +2,7 @@ package edu.mit.techscore.regatta;
 
 import java.util.Comparator;
 import java.util.Date;
-import regatta.Finish.PlaceComparator;
+import edu.mit.techscore.regatta.Finish.PlaceComparator;
 
 /**
  * Encapsulates a regatta finish, including the score (to be filled in

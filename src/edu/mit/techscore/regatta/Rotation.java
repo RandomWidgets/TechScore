@@ -9,9 +9,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import regatta.Regatta.Division;
-import regatta.Rotation.RotationStyle;
-import regatta.Rotation.RotationType;
+import edu.mit.techscore.regatta.Regatta.Division;
+import edu.mit.techscore.regatta.Rotation.RotationStyle;
+import edu.mit.techscore.regatta.Rotation.RotationType;
 
 /**
  * Rotations manage the sails that each team is racing in for a given

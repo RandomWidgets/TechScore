@@ -22,11 +22,11 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import regatta.Regatta;
-import regatta.Regatta.Division;
-import regatta.Team;
-import regatta.RegattaEvent;
-import regatta.RegattaEvent.RegattaEventType;
+import edu.mit.techscore.regatta.Regatta;
+import edu.mit.techscore.regatta.Regatta.Division;
+import edu.mit.techscore.regatta.Team;
+import edu.mit.techscore.regatta.RegattaEvent;
+import edu.mit.techscore.regatta.RegattaEvent.RegattaEventType;
 import javax.swing.ImageIcon;
 import java.util.Set;
 import java.util.HashSet;

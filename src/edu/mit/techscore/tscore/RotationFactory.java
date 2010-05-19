@@ -1,17 +1,17 @@
 package edu.mit.techscore.tscore;
 
-import regatta.Regatta;
-import regatta.RegattaListener;
-import regatta.RegattaEvent;
-import regatta.Rotation;
+import edu.mit.techscore.regatta.Regatta;
+import edu.mit.techscore.regatta.RegattaListener;
+import edu.mit.techscore.regatta.RegattaEvent;
+import edu.mit.techscore.regatta.Rotation;
 import java.util.ArrayList;
-import regatta.Regatta.Division;
-import regatta.Race;
+import edu.mit.techscore.regatta.Regatta.Division;
+import edu.mit.techscore.regatta.Race;
 import java.util.TreeMap;
-import regatta.Team;
-import regatta.Sail;
-import regatta.Rotation.RotationType;
-import regatta.Rotation.RotationStyle;
+import edu.mit.techscore.regatta.Team;
+import edu.mit.techscore.regatta.Sail;
+import edu.mit.techscore.regatta.Rotation.RotationType;
+import edu.mit.techscore.regatta.Rotation.RotationStyle;
 import java.util.Arrays;
 import java.util.Collections;
 

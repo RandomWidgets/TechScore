@@ -1,8 +1,8 @@
 package edu.mit.techscore.tscore;
 
-import regatta.Finish;
-import regatta.Race;
-import regatta.Team;
+import edu.mit.techscore.regatta.Finish;
+import edu.mit.techscore.regatta.Race;
+import edu.mit.techscore.regatta.Team;
 
 /**
  * Thin wrapper around <code>regatta.Finish</code>. Controls the

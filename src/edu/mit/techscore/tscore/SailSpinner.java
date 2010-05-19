@@ -6,7 +6,7 @@ import javax.swing.JTextField;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import regatta.Sail;
+import edu.mit.techscore.regatta.Sail;
 import javax.swing.JComponent;
 import javax.swing.SpinnerModel;
 

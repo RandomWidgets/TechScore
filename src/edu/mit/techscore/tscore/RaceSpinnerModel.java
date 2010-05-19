@@ -1,17 +1,17 @@
 package edu.mit.techscore.tscore;
 
 import javax.swing.SpinnerListModel;
-import regatta.Race;
-import regatta.Regatta.Division;
-import regatta.Regatta;
+import edu.mit.techscore.regatta.Race;
+import edu.mit.techscore.regatta.Regatta.Division;
+import edu.mit.techscore.regatta.Regatta;
 import java.util.List;
 import java.util.Iterator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.TreeSet;
 import java.util.Comparator;
-import regatta.Regatta.RegattaScoring;
-import tscore.RaceSpinnerModel.RaceComparator;
+import edu.mit.techscore.regatta.Regatta.RegattaScoring;
+import edu.mit.techscore.tscore.RaceSpinnerModel.RaceComparator;
 
 /**
  * Manages a set of races to be used in JSpinner's.

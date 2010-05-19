@@ -18,7 +18,7 @@ import javax.swing.SpinnerListModel;
 import javax.swing.SpinnerModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import regatta.Regatta;
+import edu.mit.techscore.regatta.Regatta;
 
 /**
  * Since regattas can be multi-day affairs, allow for daily

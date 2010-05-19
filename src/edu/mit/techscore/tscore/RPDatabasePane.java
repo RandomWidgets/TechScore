@@ -1,6 +1,6 @@
 package edu.mit.techscore.tscore;
 
-import regatta.Regatta;
+import edu.mit.techscore.regatta.Regatta;
 import java.io.File;
 import javax.swing.AbstractAction;
 import java.awt.event.ActionListener;
@@ -13,9 +13,9 @@ import java.awt.Insets;
 import javax.swing.JLabel;
 import javax.swing.JButton;
 import java.awt.event.ActionEvent;
-import regatta.RegattaEvent;
-import regatta.RegattaEvent.RegattaEventType;
-import regatta.Team;
+import edu.mit.techscore.regatta.RegattaEvent;
+import edu.mit.techscore.regatta.RegattaEvent.RegattaEventType;
+import edu.mit.techscore.regatta.Team;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
 import java.io.BufferedReader;

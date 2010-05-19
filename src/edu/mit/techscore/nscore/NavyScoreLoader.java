@@ -1,29 +1,29 @@
 package edu.mit.techscore.nscore;
 
-import regatta.Regatta;
+import edu.mit.techscore.regatta.Regatta;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.FileInputStream;
 import java.util.Date;
-import regatta.RP;
-import regatta.Team;
-import regatta.RP.BoatRole;
-import regatta.Sailor;
-import regatta.Regatta.Division;
+import edu.mit.techscore.regatta.RP;
+import edu.mit.techscore.regatta.Team;
+import edu.mit.techscore.regatta.RP.BoatRole;
+import edu.mit.techscore.regatta.Sailor;
+import edu.mit.techscore.regatta.Regatta.Division;
 import java.util.Arrays;
 import java.util.List;
-import regatta.Race;
-import regatta.Rotation;
+import edu.mit.techscore.regatta.Race;
+import edu.mit.techscore.regatta.Rotation;
 import java.util.Calendar;
-import regatta.Sail;
-import regatta.Finish;
-import regatta.FinishAdjustment;
-import regatta.Penalty.PenaltyType;
-import regatta.Penalty;
-import regatta.Breakdown;
-import regatta.Breakdown.BreakdownType;
-import tscore.RegattaIO;
+import edu.mit.techscore.regatta.Sail;
+import edu.mit.techscore.regatta.Finish;
+import edu.mit.techscore.regatta.FinishAdjustment;
+import edu.mit.techscore.regatta.Penalty.PenaltyType;
+import edu.mit.techscore.regatta.Penalty;
+import edu.mit.techscore.regatta.Breakdown;
+import edu.mit.techscore.regatta.Breakdown.BreakdownType;
+import edu.mit.techscore.tscore.RegattaIO;
 
 /**
  * Reads a NavyScoring (v3.92) SCO file and creates a regatta from

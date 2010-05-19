@@ -2,15 +2,15 @@ package edu.mit.techscore.tscore;
 
 import javax.swing.JFrame;
 
-import dpxml.XMLTag;
-import dpxml.XMLTextTag;
-import regatta.Race;
-import regatta.Regatta;
-import regatta.Regatta.Division;
-import regatta.RegattaEvent;
-import regatta.Rotation;
-import regatta.Team;
-import regatta.RegattaEvent.RegattaEventType;
+import edu.mit.techscore.dpxml.XMLTag;
+import edu.mit.techscore.dpxml.XMLTextTag;
+import edu.mit.techscore.regatta.Race;
+import edu.mit.techscore.regatta.Regatta;
+import edu.mit.techscore.regatta.Regatta.Division;
+import edu.mit.techscore.regatta.RegattaEvent;
+import edu.mit.techscore.regatta.Rotation;
+import edu.mit.techscore.regatta.Team;
+import edu.mit.techscore.regatta.RegattaEvent.RegattaEventType;
 import javax.swing.JEditorPane;
 import java.awt.Component;
 import java.awt.event.WindowEvent;

@@ -1,6 +1,6 @@
 package edu.mit.techscore.regatta;
 
-import regatta.Regatta.Division;
+import edu.mit.techscore.regatta.Regatta.Division;
 
 
 /**

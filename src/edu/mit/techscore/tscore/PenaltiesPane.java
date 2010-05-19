@@ -22,18 +22,18 @@ import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
-import regatta.Finish;
-import regatta.Penalty;
-import regatta.Penalty.PenaltyType;
-import regatta.Race;
-import regatta.Regatta;
-import regatta.RegattaEvent;
-import regatta.RegattaEvent.RegattaEventType;
-import regatta.Team;
+import edu.mit.techscore.regatta.Finish;
+import edu.mit.techscore.regatta.Penalty;
+import edu.mit.techscore.regatta.Penalty.PenaltyType;
+import edu.mit.techscore.regatta.Race;
+import edu.mit.techscore.regatta.Regatta;
+import edu.mit.techscore.regatta.RegattaEvent;
+import edu.mit.techscore.regatta.RegattaEvent.RegattaEventType;
+import edu.mit.techscore.regatta.Team;
 import javax.swing.JTextField;
-import tscore.FinishesPane.Using;
-import regatta.Rotation;
-import regatta.Sail;
+import edu.mit.techscore.tscore.FinishesPane.Using;
+import edu.mit.techscore.regatta.Rotation;
+import edu.mit.techscore.regatta.Sail;
 import java.awt.event.ActionListener;
 
 /**

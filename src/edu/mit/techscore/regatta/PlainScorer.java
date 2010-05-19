@@ -3,11 +3,11 @@ package edu.mit.techscore.regatta;
 import java.util.Comparator;
 import java.util.TreeSet;
 import java.util.Iterator;
-import regatta.Finish.PlaceComparator;
+import edu.mit.techscore.regatta.Finish.PlaceComparator;
 import java.util.ArrayList;
-import regatta.PlainScorer.FinishComparator;
+import edu.mit.techscore.regatta.PlainScorer.FinishComparator;
 import java.util.Arrays;
-import tscore.Factory;
+import edu.mit.techscore.tscore.Factory;
 import java.util.List;
 
 

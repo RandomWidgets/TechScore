@@ -3,7 +3,7 @@ package edu.mit.techscore.tscore;
 import javax.swing.DefaultListCellRenderer;
 import java.awt.Component;
 import javax.swing.JList;
-import regatta.Sailor;
+import edu.mit.techscore.regatta.Sailor;
 
 /**
  * Describe class SailorNameCellRenderer here.

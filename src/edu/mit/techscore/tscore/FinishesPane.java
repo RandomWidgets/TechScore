@@ -37,19 +37,19 @@ import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import regatta.Finish;
-import regatta.Race;
-import regatta.Regatta.Division;
-import regatta.Regatta.RegattaScoring;
-import regatta.Regatta;
-import regatta.RegattaEvent.RegattaEventType;
-import regatta.RegattaEvent;
-import regatta.Rotation;
-import regatta.Sail;
-import regatta.Team;
-import tscore.FinishesPane.Using;
-import tscore.RaceSpinnerModel.CombinedRaceComparator;
-import tscore.RaceSpinnerModel.RaceComparator;
+import edu.mit.techscore.regatta.Finish;
+import edu.mit.techscore.regatta.Race;
+import edu.mit.techscore.regatta.Regatta.Division;
+import edu.mit.techscore.regatta.Regatta.RegattaScoring;
+import edu.mit.techscore.regatta.Regatta;
+import edu.mit.techscore.regatta.RegattaEvent.RegattaEventType;
+import edu.mit.techscore.regatta.RegattaEvent;
+import edu.mit.techscore.regatta.Rotation;
+import edu.mit.techscore.regatta.Sail;
+import edu.mit.techscore.regatta.Team;
+import edu.mit.techscore.tscore.FinishesPane.Using;
+import edu.mit.techscore.tscore.RaceSpinnerModel.CombinedRaceComparator;
+import edu.mit.techscore.tscore.RaceSpinnerModel.RaceComparator;
 
 /**
  * Pane for entering finishes. This pane is organized in two main

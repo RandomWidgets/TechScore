@@ -35,9 +35,9 @@ import javax.swing.text.DateFormatter;
 import org.sourceforge.jcalendarbutton.*;
 import org.sourceforge.jcalendarbutton.JCalendarButton;
 import org.sourceforge.jcalendarbutton.JTimeButton;
-import regatta.Regatta.RegattaScoring;
-import regatta.Regatta.RegattaType;
-import regatta.Regatta;
+import edu.mit.techscore.regatta.Regatta.RegattaScoring;
+import edu.mit.techscore.regatta.Regatta.RegattaType;
+import edu.mit.techscore.regatta.Regatta;
 
 /**
  * The main pane for editing regatta, this pane contains the details

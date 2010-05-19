@@ -1,11 +1,11 @@
 package edu.mit.techscore.tscore;
 
-import regatta.Regatta;
-import regatta.Rotation;
-import regatta.RotationType;
-import regatta.RotationStyle;
-import regatta.Regatta.Division;
-import regatta.Race;
+import edu.mit.techscore.regatta.Regatta;
+import edu.mit.techscore.regatta.Rotation;
+import edu.mit.techscore.regatta.RotationType;
+import edu.mit.techscore.regatta.RotationStyle;
+import edu.mit.techscore.regatta.Regatta.Division;
+import edu.mit.techscore.regatta.Race;
 import java.util.ArrayList;
 import java.util.Arrays;
 

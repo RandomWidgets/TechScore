@@ -15,23 +15,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeSet;
 
-import regatta.Breakdown.BreakdownType;
-import regatta.Finish.PlaceComparator;
-import regatta.Penalty.PenaltyType;
-import regatta.Regatta.Division;
-import tscore.Factory;
-import regatta.Finish;
-import regatta.Regatta;
-import regatta.Scorer;
-import regatta.Race;
-import regatta.Team;
-import regatta.FinishAdjustment;
-import regatta.Breakdown;
-import regatta.Penalty;
-import regatta.TeamPenalty;
+import edu.mit.techscore.regatta.Breakdown.BreakdownType;
+import edu.mit.techscore.regatta.Finish.PlaceComparator;
+import edu.mit.techscore.regatta.Penalty.PenaltyType;
+import edu.mit.techscore.regatta.Regatta.Division;
+import edu.mit.techscore.tscore.Factory;
+import edu.mit.techscore.regatta.Finish;
+import edu.mit.techscore.regatta.Regatta;
+import edu.mit.techscore.regatta.Scorer;
+import edu.mit.techscore.regatta.Race;
+import edu.mit.techscore.regatta.Team;
+import edu.mit.techscore.regatta.FinishAdjustment;
+import edu.mit.techscore.regatta.Breakdown;
+import edu.mit.techscore.regatta.Penalty;
+import edu.mit.techscore.regatta.TeamPenalty;
 import java.util.Comparator;
-import tscore.ICSAScorer.CleanPlaceComparator;
-import regatta.Regatta.RegattaScoring;
+import edu.mit.techscore.tscore.ICSAScorer.CleanPlaceComparator;
+import edu.mit.techscore.regatta.Regatta.RegattaScoring;
 
 /**
  * Scoring per Intercollegeiate Sailing Associations (ICSA)

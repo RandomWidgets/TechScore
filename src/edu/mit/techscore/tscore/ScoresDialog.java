@@ -2,16 +2,16 @@ package edu.mit.techscore.tscore;
 
 import javax.swing.JFrame;
 
-import dpxml.XMLTag;
-import dpxml.XMLTextTag;
-import regatta.Finish;
-import regatta.Race;
-import regatta.Regatta;
-import regatta.Regatta.Division;
-import regatta.RegattaEvent;
-import regatta.RegattaEvent.RegattaEventType;
-import regatta.Team;
-import regatta.RP;
+import edu.mit.techscore.dpxml.XMLTag;
+import edu.mit.techscore.dpxml.XMLTextTag;
+import edu.mit.techscore.regatta.Finish;
+import edu.mit.techscore.regatta.Race;
+import edu.mit.techscore.regatta.Regatta;
+import edu.mit.techscore.regatta.Regatta.Division;
+import edu.mit.techscore.regatta.RegattaEvent;
+import edu.mit.techscore.regatta.RegattaEvent.RegattaEventType;
+import edu.mit.techscore.regatta.Team;
+import edu.mit.techscore.regatta.RP;
 import java.util.Set;
 import java.util.HashSet;
 import java.util.Map;
@@ -19,7 +19,7 @@ import java.util.Map;
 import java.util.Map;
 import java.util.List;
 import java.util.ArrayList;
-import regatta.Scorer;
+import edu.mit.techscore.regatta.Scorer;
 import javax.swing.JTabbedPane;
 import javax.swing.JEditorPane;
 import java.awt.BorderLayout;
@@ -28,9 +28,9 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.ChangeEvent;
 import java.awt.Component;
 import java.util.HashMap;
-import regatta.Sailor;
-import regatta.RP.BoatRole;
-import regatta.TeamPenalty;
+import edu.mit.techscore.regatta.Sailor;
+import edu.mit.techscore.regatta.RP.BoatRole;
+import edu.mit.techscore.regatta.TeamPenalty;
 
 /**
  * Displays the score for the regatta

@@ -33,12 +33,12 @@ import javax.swing.border.EtchedBorder;
 import javax.swing.event.*;
 import javax.swing.filechooser.FileFilter;
 
-import regatta.Regatta;
-import regatta.RegattaEvent;
-import regatta.RegattaEvent.RegattaEventType;
-import regatta.RegattaListener;
-import regatta.Scorer;
-import tscore.PaneChangeEvent.About;
+import edu.mit.techscore.regatta.Regatta;
+import edu.mit.techscore.regatta.RegattaEvent;
+import edu.mit.techscore.regatta.RegattaEvent.RegattaEventType;
+import edu.mit.techscore.regatta.RegattaListener;
+import edu.mit.techscore.regatta.Scorer;
+import edu.mit.techscore.tscore.PaneChangeEvent.About;
 import java.awt.event.WindowListener;
 import java.beans.PropertyChangeListener;
 import java.awt.event.KeyEvent;
@@ -49,7 +49,7 @@ import java.beans.PropertyChangeEvent;
 import javax.swing.JProgressBar;
 import javax.swing.JLabel;
 import java.io.IOException;
-import nscore.NavyScoreLoader;
+import edu.mit.techscore.nscore.NavyScoreLoader;
 import javax.swing.SwingUtilities;
 
 /**

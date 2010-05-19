@@ -16,11 +16,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.TreeSet;
-import regatta.Penalty.PenaltyType;
-import regatta.Penalty;
-import regatta.RP.BoatRole;
-import regatta.Regatta.Division;
-import regatta.RegattaEvent.RegattaEventType;
+import edu.mit.techscore.regatta.Penalty.PenaltyType;
+import edu.mit.techscore.regatta.Penalty;
+import edu.mit.techscore.regatta.RP.BoatRole;
+import edu.mit.techscore.regatta.Regatta.Division;
+import edu.mit.techscore.regatta.RegattaEvent.RegattaEventType;
 
 /**
  * Encapsulates sailing regatta objects.

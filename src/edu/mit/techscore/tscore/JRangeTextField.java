@@ -3,7 +3,7 @@ package edu.mit.techscore.tscore;
 import javax.swing.JTextField;
 import javax.swing.JComponent;
 import javax.swing.InputVerifier;
-import regatta.Race;
+import edu.mit.techscore.regatta.Race;
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;

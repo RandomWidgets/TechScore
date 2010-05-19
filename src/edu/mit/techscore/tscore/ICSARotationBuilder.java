@@ -4,14 +4,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import regatta.Race;
-import regatta.Regatta;
-import regatta.Regatta.Division;
-import regatta.Rotation;
-import regatta.Rotation.RotationStyle;
-import regatta.Rotation.RotationType;
-import regatta.Sail;
-import regatta.Team;
+import edu.mit.techscore.regatta.Race;
+import edu.mit.techscore.regatta.Regatta;
+import edu.mit.techscore.regatta.Regatta.Division;
+import edu.mit.techscore.regatta.Rotation;
+import edu.mit.techscore.regatta.Rotation.RotationStyle;
+import edu.mit.techscore.regatta.Rotation.RotationType;
+import edu.mit.techscore.regatta.Sail;
+import edu.mit.techscore.regatta.Team;
 
 /**
  * Implementation of a rotation builder that understands all the

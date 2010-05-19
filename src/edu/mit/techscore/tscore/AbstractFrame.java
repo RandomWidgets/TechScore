@@ -23,10 +23,10 @@ import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JToolBar;
 
-import regatta.Regatta;
-import regatta.RegattaEvent;
-import regatta.RegattaEvent.RegattaEventType;
-import regatta.RegattaListener;
+import edu.mit.techscore.regatta.Regatta;
+import edu.mit.techscore.regatta.RegattaEvent;
+import edu.mit.techscore.regatta.RegattaEvent.RegattaEventType;
+import edu.mit.techscore.regatta.RegattaListener;
 import javax.swing.ImageIcon;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
