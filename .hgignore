@@ -3,7 +3,6 @@ syntax: glob
 
 *.class
 *~
-prj.el
-TODO
+build/*
 dev/
 doc/
