@@ -1,13 +1,15 @@
 package edu.mit.techscore.tscore;
 
-import edu.mit.techscore.regatta.Regatta;
-import edu.mit.techscore.regatta.Rotation;
-import edu.mit.techscore.regatta.RotationType;
-import edu.mit.techscore.regatta.RotationStyle;
-import edu.mit.techscore.regatta.Regatta.Division;
-import edu.mit.techscore.regatta.Race;
 import java.util.ArrayList;
 import java.util.Arrays;
+
+import edu.mit.techscore.regatta.Race;
+import edu.mit.techscore.regatta.Regatta;
+import edu.mit.techscore.regatta.Regatta.Division;
+import edu.mit.techscore.regatta.Rotation;
+import edu.mit.techscore.regatta.Rotation.RotationStyle;
+import edu.mit.techscore.regatta.Rotation.RotationType;
+import edu.mit.techscore.regatta.Sail;
 
 /**
  * Creates and manages an offset (FRANNY-style) rotation for a given
@@ -53,7 +55,7 @@ public class OffsetRotationFactory extends RotationFactory {
    */
   public OffsetRotationFactory(Regatta reg,
 			       RotationType type,
-			       int [] sails,
+			       Sail [] sails,
 			       int set,
 			       int offset) {
     super(reg, type, RotationStyle.FRANNY, sails, set);

@@ -1,14 +1,15 @@
 package edu.mit.techscore.regatta;
 
-import java.util.Comparator;
-import java.util.TreeSet;
-import java.util.Iterator;
 import edu.mit.techscore.regatta.Finish.PlaceComparator;
-import java.util.ArrayList;
 import edu.mit.techscore.regatta.PlainScorer.FinishComparator;
-import java.util.Arrays;
 import edu.mit.techscore.tscore.Factory;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeSet;
 
 
 /**
@@ -27,6 +28,10 @@ public class PlainScorer implements Scorer {
 
   // Implementation of regatta.Scorer
 
+  public Map<Team, String> getRankExplanations() {
+    return null;
+  }
+
   /**
    * Describe <code>score</code> method here.
    *
@@ -44,7 +49,7 @@ public class PlainScorer implements Scorer {
       if (!scoredRaces.contains(races[i])) {
 	System.out.println("Scoring race " + races[i]);
 	places = new TreeSet<Finish>(new Finish.PlaceComparator());
-	places.addAll(regatta.getFinishes(races[i]));
+	places.addAll(Arrays.asList(regatta.getFinishes(races[i])));
 
 	int place = 1;
 	Iterator<Finish> iter = places.iterator();
