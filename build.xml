@@ -4,27 +4,50 @@
     Build file for TechScore -> jar, doc
   </description>
   <!-- set global properties for this build -->
+  <property name="version" value="1.4"/>
   <property name="doc"     location="doc"/>
-  <property name="version" value="1.3.5"/>
-  <property name="build"   location="build"/>
+  <property name="build"   location="bin"/>
   <property name="src"     location="src"/>
 
+  <!-- Source file for RESources -->
+  <property name="res"     location="res"/>
+  
   <!-- default -->
   <target name="compile" description="compile the source " >
-    <javac classpath="${src}" srcdir="${src}" destdir="${build}"/>
+    <mkdir dir="${build}"/>
+    <copy todir="${build}">
+      <fileset dir="${res}">
+	<include name="**"/>
+      </fileset>
+    </copy>
+    <javac classpath="${src}" srcdir="${src}" destdir="${build}" verbose="no"/>
   </target>
 
+  <!-- distribution -->
   <target name="dist" depends="compile" description="generate the distribution" >
-    <!-- Create the distribution directory -->
-    <!-- <mkdir dir="${dist}/lib"/> -->
+    <jar jarfile="tscore-${version}.jar" basedir="${build}" >
+      <manifest>
+	<attribute name="Main-Class" value="edu.mit.techscore.tscore.TScoreGUI" />
+      </manifest>
+    </jar>
+  </target>
 
-    <!-- Put everything in ${build} into the MyProject-${DSTAMP}.jar file -->
-    <jar jarfile="$tscore-{VERSION}.jar" basedir="."/>
+  <!-- documentation -->
+  <target name="doc" description="generate the documentation" >
+    <mkdir dir="${doc}"/>
+    <javadoc destdir="${doc}" sourcepath="${src}">
+      <doctitle>TechScore ${version} Documentation</doctitle>
+      <footer>Written by Dayan Paez</footer>
+    </javadoc>
   </target>
 
   <target name="clean" description="clean up" >
     <!-- Delete the ${build} and ${dist} directory trees -->
     <delete dir="${build}"/>
     <delete dir="${dist}"/>
+    <delete dir="${doc}"/>
+    <delete>
+      <fileset dir="." includes="*.jar"/>
+    </delete>
   </target>
 </project>

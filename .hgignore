@@ -3,6 +3,6 @@ syntax: glob
 
 *.class
 *~
-build/*
+bin/
 dev/
 doc/
