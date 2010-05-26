@@ -138,7 +138,6 @@ public class DailySummaryPane extends AbstractPane implements ChangeListener {
    *
    */
   private void commitBlurb() {
-    System.out.println(this.blurbField.getText());
     this.regatta.setBlurb(this.previousDate, this.blurbField.getText().trim());
   }
 

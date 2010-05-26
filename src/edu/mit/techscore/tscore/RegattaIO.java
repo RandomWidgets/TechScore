@@ -328,14 +328,15 @@ public class RegattaIO {
       List<Node> teamPenaltyNodes = new ArrayList<Node>();
       DateFormat tf = DateFormat.getTimeInstance(DateFormat.LONG);
       Race [] races = this.regatta.getFinishedRaces();
-      for (int i = 0; i < this.idList.size(); i++) {
-	String id = this.idList.get(i);
-	Team team = this.teamList.get(i);
-	for (Race race : races) {
-	  Finish finish = this.regatta.getFinish(race, team);
+      for (Race race : races) {
+	for (Finish finish : this.regatta.getFinishes(race)) {
 	  if (finish != null) {
+	    Team team = finish.getTeam();
+	    int i = this.teamList.indexOf(team);
+	    String id = this.idList.get(i);
+
 	    subtag = doc.createElement("Finish");
-	    subtag.setAttribute("race", String.valueOf(race));
+	    subtag.setAttribute("race", String.valueOf(finish.getRace()));
 	    subtag.setAttribute("team", id);
 	    subtag.appendChild(doc.createTextNode(tf.format(finish.getTimestamp())));
 	    finishNodes.add(subtag);
@@ -365,7 +366,11 @@ public class RegattaIO {
 	    }
 	  }
 	}
-	// Team penalty?
+      }
+      // Team penalty?
+      for (int i = 0; i < this.teamList.size(); i++) {
+	Team team = this.teamList.get(i);
+	String id = this.idList.get(i);
 	TeamPenalty pen;
 	for (Division d : this.regatta.getDivisions()) {
 	  pen = this.regatta.getTeamPenalty(d, team);
@@ -378,8 +383,8 @@ public class RegattaIO {
 	    teamPenaltyNodes.add(subtag);
 	  }
 	}
-
       }
+
       if (races.length > 0) {
 	tag = getOrCreateElement(doc, rootElement, "Finishes");
 	replaceElementContent(tag, finishNodes);

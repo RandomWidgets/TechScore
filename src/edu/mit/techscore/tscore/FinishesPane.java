@@ -37,19 +37,19 @@ import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+
 import edu.mit.techscore.regatta.Finish;
 import edu.mit.techscore.regatta.Race;
+import edu.mit.techscore.regatta.Regatta;
 import edu.mit.techscore.regatta.Regatta.Division;
 import edu.mit.techscore.regatta.Regatta.RegattaScoring;
-import edu.mit.techscore.regatta.Regatta;
-import edu.mit.techscore.regatta.RegattaEvent.RegattaEventType;
 import edu.mit.techscore.regatta.RegattaEvent;
+import edu.mit.techscore.regatta.RegattaEvent.RegattaEventType;
 import edu.mit.techscore.regatta.Rotation;
 import edu.mit.techscore.regatta.Sail;
 import edu.mit.techscore.regatta.Team;
 import edu.mit.techscore.tscore.FinishesPane.Using;
 import edu.mit.techscore.tscore.RaceSpinnerModel.CombinedRaceComparator;
-import edu.mit.techscore.tscore.RaceSpinnerModel.RaceComparator;
 
 /**
  * Pane for entering finishes. This pane is organized in two main
@@ -109,6 +109,9 @@ public class FinishesPane extends AbstractPane
   private JTextField sailField;
   private AbstractAction enterAction, removeAction;
 
+  // Track the latest race chosen
+  private Race lastRace;
+  
   /**
    * Creates a new <code>FinishesPane</code> instance.
    *
@@ -165,6 +168,7 @@ public class FinishesPane extends AbstractPane
     label = Factory.label("Race:");
     this.raceSpinnerModel = new RaceSpinnerModel(regatta.getRaces(), regatta.getScoring());
     this.raceSpinnerModel.setRace(chosenRace);
+    this.lastRace = chosenRace;
     this.raceSpinnerModel.addChangeListener(this);
     panel.add(label, c1);
     panel.add(new JSpinner(raceSpinnerModel), c2);
@@ -243,7 +247,18 @@ public class FinishesPane extends AbstractPane
     Object source = evt.getSource();
     if (source == this.raceSpinnerModel) {
       // Update the using combo to reflect the rotation state of this
-      // race
+      // race, but first ask to save if necessary
+      Race newRace = this.raceSpinnerModel.getSelectedRace();
+      if (this.lastRace == newRace) {
+	// race was reset, do nothing
+	return;
+      }
+      else if (!this.empty()) {
+	this.raceSpinnerModel.setRace(this.lastRace);
+	return;
+      }
+
+      this.lastRace = newRace;
       Using curChoice = (Using)this.usingCombo.getSelectedItem();
       DefaultComboBoxModel model =
 	(DefaultComboBoxModel)this.usingCombo.getModel();
@@ -499,6 +514,7 @@ public class FinishesPane extends AbstractPane
 
       // turn to the next race
       Race race = FinishesPane.this.getNextUnscoredRace();
+      FinishesPane.this.lastRace = race;
       raceSpinnerModel.setRace(race);
     }
   }
@@ -781,10 +797,8 @@ public class FinishesPane extends AbstractPane
    */
   public boolean empty() {
     int n;
-    // n = this.lists.getToList().getModel().getSize();
-    // if (n > 0) {
     if (this.enterAction.isEnabled()) {
-      Race race  = this.raceSpinnerModel.getSelectedRace();
+      Race race  = this.lastRace;
       String mes = String.format("Finishes for race %s have not yet been entered!\n\n" +
 				 "Enter finishes now?", race);
       n = JOptionPane.showConfirmDialog(this, mes, "Pending finishes",

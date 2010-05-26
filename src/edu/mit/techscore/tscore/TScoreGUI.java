@@ -920,8 +920,15 @@ public class TScoreGUI
      */
     public void select(EditPaneAction selectedAction) {
       if (this.currentAction != null) {
-	if (!this.currentAction.getPane().empty())
+	// should continue with the selection process?
+	if (!this.currentAction.getPane().empty()) {
+	  for (EditPaneAction act : this.actions) {
+	    if (act != this.currentAction) {
+	      act.setSelected(false);
+	    }
+	  }
 	  return;
+	}
       }
 
       for (EditPaneAction act : this.actions) {
