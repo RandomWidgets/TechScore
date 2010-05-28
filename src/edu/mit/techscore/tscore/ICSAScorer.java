@@ -150,7 +150,8 @@ public class ICSAScorer implements Scorer {
 	}
       }
     }
-    
+
+
     // Deal with average finishes
     for (int i = 0; i < averageFinishes.size(); i++) {
       Finish finish = averageFinishes.get(i);
@@ -162,7 +163,8 @@ public class ICSAScorer implements Scorer {
       int num = 0;
       Race [] otherRaces = regatta.getRaces(race.getDivision());
       for (Race otherRace: otherRaces) {
-	if (!race.equals(otherRace)) {
+	Finish otherFinish = regatta.getFinish(otherRace, team);
+	if (!race.equals(otherRace) && otherFinish != null) {
 	  // Get other score
 	  int score = regatta.getFinish(otherRace, team).getScore();
 	  if (score > 0) {
