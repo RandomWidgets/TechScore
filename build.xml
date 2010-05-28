@@ -33,9 +33,9 @@
   </target>
 
   <!-- documentation -->
-  <target name="doc" description="generate the documentation" >
+  <target name="doc" description="generate the documentation">
     <mkdir dir="${doc}"/>
-    <javadoc destdir="${doc}" sourcepath="${src}">
+    <javadoc destdir="${doc}" sourcepath="${src}" noqualifier="java.lang:java.io:java.util">
       <doctitle>TechScore ${version} Documentation</doctitle>
       <footer>Written by Dayan Paez</footer>
     </javadoc>
