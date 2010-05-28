@@ -115,7 +115,7 @@ public class TScoreGUI
   private File databaseDir;
 
   // Preferences
-  private Scorer scorer = new ICSAScorer();
+  private Scorer scorer;
 
   /**
    * Creates a new <code>TScoreGUI</code> instance.
@@ -123,6 +123,9 @@ public class TScoreGUI
    */
   public TScoreGUI() {
     super("TechScore");
+
+    this.scorer = new ICSAScorer();
+
     this.setMinimumSize(new Dimension(300, 300));
     this.loadPreferences();
     this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);

@@ -516,6 +516,7 @@ public class FinishesPane extends AbstractPane
       Race race = FinishesPane.this.getNextUnscoredRace();
       FinishesPane.this.lastRace = race;
       raceSpinnerModel.setRace(race);
+      updateFinishPanel();
     }
   }
 

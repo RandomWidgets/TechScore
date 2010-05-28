@@ -1,7 +1,5 @@
 package edu.mit.techscore.tscore;
 
-
-
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Insets;
@@ -10,16 +8,12 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.DateFormat;
-import java.text.ParseException;
 import java.util.Date;
 import java.util.Locale;
-import javax.swing.AbstractAction;
-import javax.swing.JButton;
+import javax.swing.BorderFactory;
 import javax.swing.JComboBox;
-import javax.swing.JComponent;
 import javax.swing.JFormattedTextField;
 import javax.swing.JLabel;
-import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
@@ -29,15 +23,12 @@ import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
 import javax.swing.text.DateFormatter;
-import org.sourceforge.jcalendarbutton.*;
-import org.sourceforge.jcalendarbutton.JCalendarButton;
-import org.sourceforge.jcalendarbutton.JTimeButton;
+
+import edu.mit.techscore.regatta.Regatta;
 import edu.mit.techscore.regatta.Regatta.RegattaScoring;
 import edu.mit.techscore.regatta.Regatta.RegattaType;
-import edu.mit.techscore.regatta.Regatta;
+import org.sourceforge.jcalendarbutton.*;
 
 /**
  * The main pane for editing regatta, this pane contains the details
@@ -78,7 +69,6 @@ public class DetailsPane
   private SpinnerNumberModel durationModel;
   private JComboBox typeField, scoringField;
   private JTextArea blurbField;
-  private JLabel infoLabel;
 
   /**
    * Creates a new <code>DetailsPane</code> instance.
@@ -97,6 +87,18 @@ public class DetailsPane
   
   public void fill() {
     this.removeAll();
+
+    GridBagConstraints p = new GridBagConstraints();
+    p.gridx = 0;
+    p.gridy = 0;
+    p.insets = new Insets(2,2,2,2);
+    p.fill = GridBagConstraints.BOTH;
+    p.weightx = 1.0;
+    p.weighty = 0.0;
+    JPanel panel = new JPanel();
+    panel.setLayout(new GridBagLayout());
+    panel.setBorder(BorderFactory.createTitledBorder("Settings"));
+    this.add(panel, p);
 
     GridBagConstraints c1, c2, c3;
     Insets insts = new Insets(2,2,2,2);
@@ -125,8 +127,8 @@ public class DetailsPane
 	    setName(DetailsPane.this.nameField.getText());
 	}
       });
-    this.add(label, c1);
-    this.add(nameField, c2);
+    panel.add(label, c1);
+    panel.add(nameField, c2);
 
     //- Date
     c1.gridy++; c2.gridy++; c3.gridy++;
@@ -146,8 +148,8 @@ public class DetailsPane
 	  }
 	}
       });
-    this.add(label, c1);
-    this.add(dateField, c2);
+    panel.add(label, c1);
+    panel.add(dateField, c2);
 
     //- Calendar button
     dateButton = new JCalendarButton(regatta.getStartTime());
@@ -162,7 +164,7 @@ public class DetailsPane
 	  }
 	}
       });
-    this.add(dateButton, c3);
+    panel.add(dateButton, c3);
 
     //- Time
     c1.gridy++; c2.gridy++; c3.gridy++;
@@ -181,8 +183,8 @@ public class DetailsPane
 	  }
 	}
       });
-    this.add(label, c1);
-    this.add(timeField, c2);
+    panel.add(label, c1);
+    panel.add(timeField, c2);
 
     //- Time button
     timeButton = new JTimeButton(regatta.getStartTime());
@@ -194,7 +196,7 @@ public class DetailsPane
 	  }
 	}
       });
-    this.add(timeButton, c3);
+    panel.add(timeButton, c3);
 
     //- Duration
     c1.gridy++; c2.gridy++; c3.gridy++;
@@ -208,9 +210,9 @@ public class DetailsPane
       });
     JSpinner durationField = Factory.spinner(durationModel);
     JLabel days = new JLabel("day(s)");
-    this.add(label, c1);
-    this.add(durationField, c2);
-    this.add(days, c3);
+    panel.add(label, c1);
+    panel.add(durationField, c2);
+    panel.add(days, c3);
 
     //- Type
     c1.gridy++; c2.gridy++; c3.gridy++;
@@ -224,8 +226,8 @@ public class DetailsPane
 	  regatta.setType((RegattaType)typeField.getSelectedItem());
 	}
       });
-    this.add(label, c1);
-    this.add(typeField, c2);
+    panel.add(label, c1);
+    panel.add(typeField, c2);
 
     //- Scoring
     c1.gridy++; c2.gridy++; c3.gridy++;
@@ -239,23 +241,70 @@ public class DetailsPane
 	  regatta.setScoring((RegattaScoring)scoringField.getSelectedItem());
 	}
       });
-    this.add(label, c1);
-    this.add(scoringField, c2);
+    panel.add(label, c1);
+    panel.add(scoringField, c2);
 
     //-  Spacer and messages pane
-    c1.gridy++;
-    c1.weighty = 1.0;
-    c1.gridwidth = 3;
-    this.infoLabel = new JLabel(this.getRegattaInfo(), SwingConstants.LEFT);
-    this.infoLabel.setVerticalAlignment(SwingConstants.TOP);
-    this.add(this.infoLabel, c1);
+    p.gridy++;
+    p.weighty = 1.0;
+    JPanel infoLabel = new JPanel();
+    JScrollPane pane = new JScrollPane(infoLabel);
+    this.add(pane, p);
+    pane.setBorder(BorderFactory.createTitledBorder("Overview"));
+    this.getRegattaInfo(infoLabel);
   }
 
-  private String getRegattaInfo() {
-    StringBuilder text = new StringBuilder("<html>");
-    text.append("<strong>No. teams:</strong> " + this.regatta.getTeams().length + "<br>");
-    text.append("</html>");
-    return text.toString();
+  private void getRegattaInfo(JPanel p) {
+    p.setLayout(new GridBagLayout());
+    GridBagConstraints c0, c1;
+    c0 = new GridBagConstraints();
+    c1 = new GridBagConstraints();
+    c0.gridx = 0; c1.gridx = 1;
+    c0.gridy = 0; c1.gridy = 0;
+    c0.insets = new Insets(2,2,2,2);
+    c1.insets = new Insets(2,2,2,2);
+    c0.fill = GridBagConstraints.HORIZONTAL;
+    c1.fill = GridBagConstraints.HORIZONTAL;
+    c0.weightx = 0.5;
+    c1.weightx = 1.0;
+    
+    newRow(p, c0, c1, "No. teams:",     this.regatta.getTeams().length);
+    newRow(p, c0, c1, "No. divisions:", this.regatta.getDivisions().length);
+    newRow(p, c0, c1, "No. races:",     this.regatta.getNumRaces());
+    newRow(p, c0, c1, "","");
+    newRow(p, c0, c1, "Using rotation:", (this.regatta.getRotation() == null) ? "No" : "Yes");
+    newRow(p, c0, c1, "","");
+    newRow(p, c0, c1, "Scored races:",  this.regatta.getFinishedRaces().length);
+
+    // spacer
+    c0.weighty = 1.0;
+    c1.weighty = 1.0;
+    newRow(p, c0, c1, "", "");
+  }
+
+  /**
+   * Helper method returns a row in a table with the header and
+   * content as given
+   *
+   * @param header the header text
+   * @param content the content
+   */
+  private void newRow(JPanel p,
+		      GridBagConstraints c0,
+		      GridBagConstraints c1,
+		      String header,
+		      String content) {
+    p.add(new JLabel(header,  SwingConstants.LEFT), c0);
+    p.add(new JLabel(content, SwingConstants.RIGHT),c1);
+    c0.gridy++;
+    c1.gridy++;
+  }
+  private void newRow(JPanel p,
+		      GridBagConstraints c0,
+		      GridBagConstraints c1,
+		      String header,
+		      int content) {
+    newRow(p, c0, c1, header, String.valueOf(content));
   }
 
   /**
