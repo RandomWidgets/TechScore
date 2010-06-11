@@ -1,5 +1,5 @@
 (jde-project-file-version "1.4")
-(setq cwd (file-name-directory (expand-file-name "/home/dayan/techscore-dev/")))
+(setq cwd (file-name-directory (expand-file-name "/home/dayan/ts/techscore-dev/")))
 (jde-set-variables
  '(jde-log-max 5000)
  '(jde-enable-abbrev-mode t)

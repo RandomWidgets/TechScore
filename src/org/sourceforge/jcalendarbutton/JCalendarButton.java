@@ -52,13 +52,11 @@ public class JCalendarButton extends JButton
     {
         super();
         // Get current classloader
-        ClassLoader cl = this.getClass().getClassLoader();
+        Class cl = this.getClass();
         // Create icons
         try   {
             Icon icon  =
-	      new ImageIcon(cl.getResource("tscore/img/" +
-					   JCalendarPopup.CALENDAR_ICON +
-					   ".gif"));
+	      new ImageIcon(cl.getResource("images/" + JCalendarPopup.CALENDAR_ICON + ".gif"));
             this.setIcon(icon);
         } catch (Exception ex)  {
             this.setText("Date");

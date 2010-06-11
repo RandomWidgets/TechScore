@@ -47,7 +47,7 @@
     <delete dir="${dist}"/>
     <delete dir="${doc}"/>
     <delete>
-      <fileset dir="." includes="*.jar"/>
+      <fileset dir="." includes="tscore-*.jar"/>
     </delete>
   </target>
 </project>
