@@ -98,6 +98,7 @@ public class TScoreGUI
   private JToolBar toolBar;
   private JPanel contentPanel;
   private AbstractFrame rotationDialog, scoreDialog;
+  private IntroductionDialog helpDialog;
   private AbstractPane [] editPanes;
   private EditPaneActionGroup.EditPaneAction defaultPaneAction;
   private final JDialog aboutDialog;
@@ -109,7 +110,7 @@ public class TScoreGUI
   private SaveAsRegattaAction saAction;
   private CloseRegattaAction crAction;
   private QuitAction quAction;
-  private ToggleDialogAction sRotAction, sScoreAction;
+  private ToggleDialogAction sRotAction, sScoreAction, sHelpAction;
 
   // Temporary directory
   private File databaseDir;
@@ -161,6 +162,10 @@ public class TScoreGUI
 						 this.rotationDialog);
     this.sScoreAction   = new ToggleDialogAction("View scores",
 						 this.scoreDialog);
+
+    // Help Window
+    this.helpDialog     = new IntroductionDialog(this);
+    this.sHelpAction    = new ToggleDialogAction("Quick guide", this.helpDialog);
 
     this.setContentPane(new JPanel(new BorderLayout()));
 
@@ -286,6 +291,10 @@ public class TScoreGUI
     // -Help
     menu = new JMenu("Help", false);
     menu.setMnemonic(KeyEvent.VK_H);
+    //   -Quick guide
+    cbItem = new JCheckBoxMenuItem(this.sHelpAction);
+    this.sHelpAction.addButton(cbItem);
+    menu.add(cbItem);
     //   -About
     this.aboutDialog = new AboutDialog(this);
     menu.add(new JMenuItem(new AbstractAction("About...") {
@@ -943,6 +952,10 @@ public class TScoreGUI
 	}
       }
       this.currentAction = selectedAction;
+      TScoreGUI.this.
+	helpDialog.paneChanged(new PaneChangeEvent(this.currentAction.getPane(),
+						   PaneChangeEvent.About.VISIBILITY,
+						   true));
     }
 
     /**

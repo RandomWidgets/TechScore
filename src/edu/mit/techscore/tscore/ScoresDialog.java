@@ -75,7 +75,7 @@ public class ScoresDialog
     }
   }
 
-  private static String BLANK_TEXT = "No scores yet.";
+  private static XMLTag BLANK_TEXT = new XMLTag("html", new XMLTag[]{new XMLTextTag("No scores yet.")});
 
   private TScoreGUI parent;
   private JTabbedPane tabPane;
@@ -100,27 +100,17 @@ public class ScoresDialog
    * Creates an HTML rendition of the totals table and updates a
    * number of the interior parameters to be used in rendering the
    * totals for the divisions. This method must be called prior to
-   * getDivisionString.
+   * getDivisionXML.
    *
    * @return a <code>String</code> value
    */
-  private String getTotalsString() {
-    XMLTag root = new XMLTag("html");
+  private XMLTag getTotalsXML() {
     if (this.regatta.getFinishedRaces().length == 0) {
       return BLANK_TEXT;
     }
 
-    XMLTag head, body;
-    root.add(head = new XMLTag("head"));
-
-    // Stylesheet
-    XMLTag stylesheet = new XMLTag("style");
-    stylesheet.addAttr("type", "text/css");
-    stylesheet.add(new XMLTextTag(this.styleString));
-    head.add(stylesheet);
-
-    root.add(body = new XMLTag("body"));
-    XMLTag title, tab, row, cell;
+    XMLTag div, title, tab, row, cell;
+    div = new XMLTag("div");
 
     // TOTALs
     this.parent.doScore();
@@ -138,8 +128,8 @@ public class ScoresDialog
     title = new XMLTag("h2");
     title.add(new XMLTextTag("Total Scores"));
     tab = new XMLTag("table");
-    body.add(title);
-    body.add(tab);
+    div.add(title);
+    div.add(tab);
 
     // Header
     tab.add(row  = new XMLTag("tr"));
@@ -308,11 +298,11 @@ public class ScoresDialog
 
     // Legend, if necessary
     if (priorExplanations.size() > 0) {
-      body.add(title = new XMLTag("h3"));
+      div.add(title = new XMLTag("h3"));
       title.add(new XMLTextTag("Tiebreaking legend"));
 
       XMLTag ul;
-      body.add(ul = new XMLTag("dl"));
+      div.add(ul = new XMLTag("dl"));
       XMLTag dt, dd;
       for (int i = 0; i < priorExplanations.size(); i++) {
 	ul.add(dt = new XMLTag("dt"));
@@ -322,27 +312,17 @@ public class ScoresDialog
       }
     }
 
-    return root.toXMLString();
+    return div;
   }
 
-  private String getDivisionString(Division div) {
+  private XMLTag getDivisionXML(Division div) {
     RP rp = this.regatta.getRP();
     
-    XMLTag root = new XMLTag("html");
     if (this.regatta.getFinishedRaces(div).length == 0) {
       return BLANK_TEXT;
     }
 
-    XMLTag head, body;
-    root.add(head = new XMLTag("head"));
-    root.add(body = new XMLTag("body"));
-
-    // Stylesheet
-    XMLTag stylesheet = new XMLTag("style");
-    stylesheet.addAttr("type", "text/css");
-    stylesheet.add(new XMLTextTag(this.styleString));
-    head.add(stylesheet);
-
+    XMLTag body = new XMLTag("div");
     XMLTag title, tab, row, row2, cell;
     body.add(title = new XMLTag("h3"));
     title.add(new XMLTextTag("Division " + div));
@@ -522,7 +502,7 @@ public class ScoresDialog
       }
     }
 
-    return root.toXMLString();
+    return body;
   }
 
   protected Component getContentComponent() {
@@ -545,24 +525,37 @@ public class ScoresDialog
     JScrollPane scrollPane;
     JEditorPane editorPane;
 
+    Division [] divs = regatta.getDivisions();
+    XMLTag [] roots = new XMLTag[divs.length + 1];
+
+    // Overall
+    roots[0] = (this.isVisible()) ? getTotalsXML() : BLANK_TEXT;
+    for (int i = 0; i < divs.length; i++) {
+      roots[i + 1] = (this.isVisible()) ?
+	getDivisionXML(divs[i]) :
+	BLANK_TEXT;
+    }
+
     // Totals
-    String str = (this.isVisible()) ? getTotalsString() : "";
-    tabPane.addTab("Totals",
-		   new JScrollPane(editorPane =
-				   new JEditorPane("text/html", str)));
+    editorPane = new JEditorPane("text/html", wrapHTML(roots[0]).toXMLString());
     editorPane.setEditable(false);
+    tabPane.addTab("Totals", new JScrollPane(editorPane));
 
     // Divisions
-    Division [] divs = regatta.getDivisions();
-
     for (int i = 0; i < divs.length; i++) {
-      Division div = divs[i];
-      str = (this.isVisible()) ? getDivisionString(div) : "";
-      tabPane.addTab("Division " + div,
-		     new JScrollPane(editorPane =
-				     new JEditorPane("text/html", str)));
+      editorPane = new JEditorPane("text/html", wrapHTML(roots[i + 1]).toXMLString());
       editorPane.setEditable(false);
+      tabPane.addTab("Division " + divs[i], new JScrollPane(editorPane));
+
+      for (XMLTag sub : roots[i + 1].getChildren()) {
+	roots[0].add(sub);
+      }
     }
+
+    // Overall
+    editorPane = new JEditorPane("text/html", wrapHTML(roots[0]).toXMLString());
+    editorPane.setEditable(false);
+    tabPane.addTab("All in one", new JScrollPane(editorPane));
   }
 
   protected void update() {
@@ -570,29 +563,41 @@ public class ScoresDialog
       return;
     }
 
+    List<XMLTag> roots = new ArrayList<XMLTag>(this.tabPane.getTabCount());
+    roots.add(this.getTotalsXML());
+
     // Go through each tab and update its content
     // 1. the totals pane
     JEditorPane editorPane;
     JScrollPane scrollPane;
     scrollPane = (JScrollPane)this.tabPane.getComponentAt(0);
     editorPane = (JEditorPane)scrollPane.getViewport().getView();
-    editorPane.setText(this.getTotalsString());
+    editorPane.setText(wrapHTML(roots.get(0)).toXMLString());
 
     // 2. divisions
-    this.updateDivisions();
+    this.updateDivisions(roots);
   }
 
-  protected void updateDivisions() {
+  protected void updateDivisions(List<XMLTag> roots) {
     JEditorPane editorPane;
     JScrollPane scrollPane;
 
-    int num = this.tabPane.getTabCount() - 1;
+    int num = this.tabPane.getTabCount() - 2;
     Division [] divs = Division.values();
     for (int i = 0; i < num; i++) {
+      XMLTag other = this.getDivisionXML(divs[i]);
+
       scrollPane = (JScrollPane)this.tabPane.getComponentAt(i+1);
       editorPane = (JEditorPane)scrollPane.getViewport().getView();
-      editorPane.setText(this.getDivisionString(divs[i]));
+      editorPane.setText(wrapHTML(other).toXMLString());
+
+      roots.add(other);
     }
+
+    // overall
+    scrollPane = (JScrollPane)this.tabPane.getComponentAt(num + 1);
+    editorPane = (JEditorPane)scrollPane.getViewport().getView();
+    editorPane.setText(wrapHTML(roots).toXMLString());
   }
 
   // Implementation of regatta listener
@@ -607,12 +612,40 @@ public class ScoresDialog
 	this.update();
       }
       else if (type == RegattaEventType.RP) {
-	this.updateDivisions();
+	this.update();
       }
       else if (type == RegattaEventType.SCORING) {
 	this.update();
       }
 
     }
+  }
+
+  /**
+   * Wraps the given element in the correct HTML element with tags and
+   * all that jazz
+   *
+   * @param elems the elements to wrap
+   * @return the HTML root
+   */
+  private XMLTag wrapHTML(List<XMLTag> elems) {
+    XMLTag root = new XMLTag("html");
+
+    XMLTag head;
+    root.add(head = new XMLTag("head"));
+
+    // Stylesheet
+    XMLTag stylesheet = new XMLTag("style");
+    stylesheet.addAttr("type", "text/css");
+    stylesheet.add(new XMLTextTag(this.styleString));
+    head.add(stylesheet);
+
+    root.add(new XMLTag("body", elems.toArray(new XMLTag[]{})));
+    return root;
+  }
+  private XMLTag wrapHTML(XMLTag elem) {
+    List<XMLTag> list = new ArrayList<XMLTag>(1);
+    list.add(elem);
+    return this.wrapHTML(list);
   }
 }

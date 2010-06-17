@@ -40,9 +40,9 @@ public class Rotation {
   }
 
   public static enum RotationStyle {
-    NONE("Collated"),
-      NAVY("Non-collated"),
-      FRANNY("Non-collated with amount...");
+    NONE("Same for all divisions"),
+      NAVY("Rotate sail at division switch"),
+      FRANNY("Start sails offset between divisions");
     private String name;
     RotationStyle(String n) {
       this.name = n;

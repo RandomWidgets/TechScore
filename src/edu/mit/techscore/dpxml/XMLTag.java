@@ -45,7 +45,7 @@ public class XMLTag {
    * @return Array of <code>XMLTag</code>s
    */
   public XMLTag[] getChildren() {
-    return (XMLTag [])this.children.toArray();
+    return this.children.toArray(new XMLTag[]{});
   }
 
   /**

@@ -33,6 +33,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 import java.util.Map;
+import edu.mit.techscore.regatta.Team;
 
 /**
  * Describe class TweakRotationsPane here.
@@ -77,6 +78,7 @@ public class TweakRotationsPane extends AbstractPane {
   private JList divisionList;
   private JRangeTextField raceField;
   private SpinnerNumberModel amountField, newSailField;
+  private SailSpinner newSailSpinner;
   private List<Component> changeComponents;
 
   // Layout
@@ -247,7 +249,7 @@ public class TweakRotationsPane extends AbstractPane {
       button = new JButton(new AbstractAction("Replace sail") {
 	  public void actionPerformed(ActionEvent e) {
 	    // Get old and new sails
-	    String oldSailNum = ((Sail)sailField.getSelectedItem()).getSail();
+	    Sail oldSail = (Sail)sailField.getSelectedItem();
 	    String newSailNum = String.valueOf(newSailField.getNumber());
 
 	    // Get the races
@@ -258,12 +260,14 @@ public class TweakRotationsPane extends AbstractPane {
 		Sail [] sails = rot.getSails(race);
 		
 		for (Sail s : sails) {
-		  if (s.getSail() == oldSailNum) {
-		    s.setSail(newSailNum);
+		  if (s.equals(oldSail)) {
+		    Team team = rot.getTeam(race, s);
+		    rot.setSail(race, team, new Sail(newSailNum));
 		  }
 		}
 	      }
 	    }
+
 	    regatta.fireRegattaChange(new RegattaEvent(regatta,
 						       RegattaEventType.ROTATION,
 						       TweakRotationsPane.this));
@@ -301,9 +305,10 @@ public class TweakRotationsPane extends AbstractPane {
 	  }
 	});
       this.add(label, p1);
-      this.add(spinner = new JSpinner(newSailField), p2);
+      // this.add(spinner = new JSpinner(newSailField), p2);
+      this.add(this.newSailSpinner = new SailSpinner(new Sail(String.valueOf(nextSail + 1))), p2);
       this.changeComponents.add(label);
-      this.changeComponents.add(spinner);
+      this.changeComponents.add(this.newSailSpinner);
 
       //- Spacer
       p1.gridy++; p2.gridy++;

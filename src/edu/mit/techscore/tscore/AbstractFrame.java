@@ -34,6 +34,8 @@ import java.io.InputStream;
 import java.io.FileReader;
 import java.net.URISyntaxException;
 import java.awt.Component;
+import javax.swing.Icon;
+import javax.swing.filechooser.FileFilter;
 
 /**
  * Parent of all display frames in TechScore such as those that
@@ -94,7 +96,11 @@ public abstract class AbstractFrame
     tb.add(new JButton(this.printAction = new PrintAction()));
     tb.add(new JButton(this.saveAction = new SaveAction()));
     this.getContentPane().add(tb, BorderLayout.PAGE_START);
-    this.setIconImage(new ImageIcon(getClass().getResource("img/" + name + "Icon.png")).getImage());
+    try {
+      this.setIconImage(new ImageIcon(getClass().getResource("img/" + name + "Icon.png")).getImage());
+    } catch (Exception e) {
+      System.err.println("No icon for the " + name + " frame.");
+    }
 
     // Initialize components
     this.getContentPane().add(this.getContentComponent(), BorderLayout.CENTER);
@@ -236,10 +242,27 @@ public abstract class AbstractFrame
     }
     public void actionPerformed(ActionEvent evt) {
       JFileChooser fc = new JFileChooser();
+      fc.setFileFilter(new FileFilter() {
+	  public boolean accept(File f) {
+	    if (f.isDirectory())
+	      return true;
+
+	    String ext = Factory.getExtension(f);
+	    return (ext == null || ext.equalsIgnoreCase(".html") || ext.equalsIgnoreCase(".htm"));
+	  }
+	  public String getDescription() {
+	    return "HTML (*.html)";
+	  }
+	});
       int returnVal = fc.showSaveDialog(AbstractFrame.this);
 
       if (returnVal == JFileChooser.APPROVE_OPTION) {
 	File f = fc.getSelectedFile();
+	// Append the extension if none found
+	String ext = Factory.getExtension(f);
+	if (ext == null || !ext.equalsIgnoreCase("html") || !ext.equalsIgnoreCase("htm")) {
+	  f = new File(f.getPath() + ".html");
+	}
 
 	try {
 	  FileWriter fstream = new FileWriter(f);
