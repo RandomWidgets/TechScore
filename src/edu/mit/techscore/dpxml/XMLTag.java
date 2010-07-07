@@ -84,27 +84,10 @@ public class XMLTag {
   }
 
   /**
-   * Returns <code>String</code> output as XML content
-   * @return XML tags
+   * @return XML string, no indentation.
    */
   public String toXMLString() {
-    return this.toXMLString(0);
-  }
-  /**
-   * @return XML string with specified indentation
-   */
-  public String toXMLString(int ind) {
-    // Indent, if necessary
-    String rep;
-    if (ind == 0) {
-      rep = "";
-    }
-    else {
-      String format = "%" + ind + "s";
-      rep = String.format(format, " ");
-    }
-
-    rep += String.format("<%s", this.name);
+    String rep = String.format("<%s", this.name);
 
     // Write attributes
     String [] attrs = this.getAttrs();
@@ -119,23 +102,18 @@ public class XMLTag {
 
     // Any children?
     if (this.children.size() == 0) {
-      rep += "/>\n";
+      rep += "/>";
       return rep;
     }
-    rep += ">\n";
+    rep += ">";
 
     // Write children
     for (int i = 0; i < this.children.size(); i++) {
-      rep += this.children.get(i).toXMLString(ind + 2);
+      rep += this.children.get(i).toXMLString();
     }
 
     // Close tag
-    if (ind > 0) {
-      String format = "%" + ind + "s";
-      rep += String.format(format, " ");
-    }
-    rep += String.format("</%s>\n", this.name);
-
+    rep += String.format("</%s>", this.name);
     return rep;
   }
 }

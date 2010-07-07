@@ -39,7 +39,8 @@ public class Team implements Comparable<Team> {
   }
 
   /**
-   * Creates a new <code>Team</code> instance.
+   * Creates a new <code>Team</code> instance. Assigns the team's long
+   * name as the default affiliation.
    *
    */
   public Team(String longname, String shortname) {
@@ -50,6 +51,7 @@ public class Team implements Comparable<Team> {
 
     this.longname = longname.trim();
     this.shortname = (shortname == null) ? "" : shortname.trim();
+    this.rpAffiliation = this.longname;
   }
 
   /**

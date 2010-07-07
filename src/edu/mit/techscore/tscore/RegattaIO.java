@@ -31,8 +31,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import java.util.Set;
 import javax.xml.parsers.DocumentBuilder;
@@ -49,11 +52,6 @@ import javax.xml.transform.stream.StreamResult;
 
 import edu.mit.techscore.dpxml.XMLTag;
 import edu.mit.techscore.dpxml.XMLTextTag;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
 import edu.mit.techscore.regatta.Breakdown;
 import edu.mit.techscore.regatta.Breakdown.BreakdownType;
 import edu.mit.techscore.regatta.Finish;
@@ -65,6 +63,7 @@ import edu.mit.techscore.regatta.RP.BoatRole;
 import edu.mit.techscore.regatta.Race;
 import edu.mit.techscore.regatta.Regatta;
 import edu.mit.techscore.regatta.Regatta.Division;
+import edu.mit.techscore.regatta.Regatta.RegattaScoring;
 import edu.mit.techscore.regatta.Regatta.RegattaType;
 import edu.mit.techscore.regatta.Rotation;
 import edu.mit.techscore.regatta.Rotation.RotationStyle;
@@ -72,12 +71,16 @@ import edu.mit.techscore.regatta.Rotation.RotationType;
 import edu.mit.techscore.regatta.Sail;
 import edu.mit.techscore.regatta.Sailor;
 import edu.mit.techscore.regatta.Team;
-import java.util.HashSet;
-import java.util.HashMap;
-import java.util.Map;
 import edu.mit.techscore.regatta.TeamPenalty;
 import edu.mit.techscore.regatta.TeamPenalty.TeamPenaltyType;
-import edu.mit.techscore.regatta.Regatta.RegattaScoring;
+import edu.mit.techscore.regatta.MembershipDatabase;
+import edu.mit.techscore.regatta.MembershipDatabase.Membership;
+
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 /**
  * <p>Manages a regatta connection to a file. When the regatta is
@@ -178,8 +181,7 @@ public class RegattaIO {
    */
   public final boolean rewriteFile(Regatta reg,
 				   File inFile,
-				   File outFile,
-				   File databaseDir) {
+				   File outFile) {
     this.setRegatta(reg);
     DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
     try {
@@ -422,10 +424,10 @@ public class RegattaIO {
       }
 
       // RP
+      Calendar cal = Calendar.getInstance();
       RP rp = this.regatta.getRP();
       if (rp != null) {
 	List<Node> sailorNodes = new ArrayList<Node>();
-	Calendar cal = Calendar.getInstance();
 	Division [] divs = this.regatta.getDivisions();
 	for (int i = 0; i < this.idList.size(); i++) {
 	  String id = this.idList.get(i);
@@ -467,90 +469,64 @@ public class RegattaIO {
       tag = getOrCreateElement(doc, rootElement, "Membership");
       
       // 1. Go through each affiliate, and fill in new members
+      MembershipDatabase rpDB = regatta.getRP().getDatabase();
       Set<String> doneAffiliates = new HashSet<String>();
       NodeList nl = tag.getElementsByTagName("Affiliate");
       for (int n = 0; n < nl.getLength(); n++) {
 	Element affElem = (Element)nl.item(n);
 	String affID = affElem.getAttribute("id");
 	if (affID.length() > 0) {
-	  File affFile = new File(databaseDir, affID);
-	  if (affFile.exists()) {
+	  Membership [] members = rpDB.getMembers(affID);
+	  if (members != null) {
 	    doneAffiliates.add(affID);
 	    // Add new ones
 	    Element newSailor, subelem;
-	    try {
-	      BufferedReader reader =
-		new BufferedReader(new FileReader(affFile));
-	      String line;
-	      while ((line = reader.readLine()) != null) {
-		String [] fields = line.split("\t");
-		try {
-		  boolean isNew = Boolean.parseBoolean(fields[3]);
-		  if (isNew) {
-		    newSailor = doc.createElement("Member");
-		    affElem.appendChild(newSailor);
-		    newSailor.setAttribute("id", fields[0]);
-		    newSailor.setAttribute("data", "TechScore v" + TScoreGUI.VERSION);
-		    // Name
-		    subelem = doc.createElement("Name");
-		    newSailor.appendChild(subelem);
-		    subelem.appendChild(doc.createTextNode(fields[1]));
-		    // Year
-		    subelem = doc.createElement("Year");
-		    newSailor.appendChild(subelem);
-		    subelem.appendChild(doc.createTextNode(fields[2]));
-		  }
-		} catch (Exception e) {
-		  System.err.println("Error in format for sailor, ignoring: " + line);
-		  e.printStackTrace();
-		}
+	    for (Membership member: members) {
+	      if (member.isNew()) {
+		newSailor = doc.createElement("Member");
+		affElem.appendChild(newSailor);
+		newSailor.setAttribute("id", member.getID());
+		newSailor.setAttribute("data", "TechScore v" + TScoreGUI.VERSION);
+		newSailor.setAttribute("editable", String.valueOf(member.isNew()));
+		// Name
+		subelem = doc.createElement("Name");
+		newSailor.appendChild(subelem);
+		subelem.appendChild(doc.createTextNode(member.getName()));
+		// Year
+		cal.setTime(member.getYear());
+		subelem = doc.createElement("Year");
+		newSailor.appendChild(subelem);
+		subelem.appendChild(doc.createTextNode(String.valueOf(cal.get(Calendar.YEAR))));
 	      }
-	    } catch (IOException e) {
-	      System.err.println("Unable to read database file: " + affFile);
 	    }
 	  }
 	}
       }
       
       // 2. Go through each new affiliate
-      try {
-	for (File affFile : databaseDir.listFiles()) {
-	  if (!doneAffiliates.contains(affFile.getName())) {
-	    // Create the member
-	    Element affElem = doc.createElement("Affiliate");
-	    tag.appendChild(affElem);
-	    affElem.setAttribute("id", affFile.getName());
-	    Element newSailor, subelem;
-	    try {
-	      BufferedReader reader =
-		new BufferedReader(new FileReader(affFile));
-	      String line;
-	      while ((line = reader.readLine()) != null) {
-		String [] fields = line.split("\t");
-		try {
-		  newSailor = doc.createElement("Member");
-		  affElem.appendChild(newSailor);
-		  newSailor.setAttribute("id", fields[0]);
-		  newSailor.setAttribute("data", "TechScore v" + TScoreGUI.VERSION);
-		  // Name
-		  subelem = doc.createElement("Name");
-		  newSailor.appendChild(subelem);
-		  subelem.appendChild(doc.createTextNode(fields[1]));
-		  // Year
-		  subelem = doc.createElement("Year");
-		  newSailor.appendChild(subelem);
-		  subelem.appendChild(doc.createTextNode(fields[2]));
-		} catch (Exception e) {
-		  System.err.println("Error in format for sailor, ignoring: " + line);
-		}
-	      }
-	    } catch (IOException e) {
-	      System.err.println("Unable to read database file: " + affFile);
-	    }
+      for (String aff : rpDB.getAffiliations()) {
+	if (!doneAffiliates.contains(aff)) {
+	  // Create the member
+	  Element affElem = doc.createElement("Affiliate");
+	  tag.appendChild(affElem);
+	  affElem.setAttribute("id", aff);
+	  Element newSailor, subelem;
+	  for (Membership member : rpDB.getMembers(aff)) {
+	    newSailor = doc.createElement("Member");
+	    affElem.appendChild(newSailor);
+	    newSailor.setAttribute("id", member.getID());
+	    newSailor.setAttribute("data", "TechScore v" + TScoreGUI.VERSION);
+	    // Name
+	    subelem = doc.createElement("Name");
+	    newSailor.appendChild(subelem);
+	    subelem.appendChild(doc.createTextNode(member.getName()));
+	    // Year
+	    cal.setTime(member.getYear());
+	    subelem = doc.createElement("Year");
+	    newSailor.appendChild(subelem);
+	    subelem.appendChild(doc.createTextNode(String.valueOf(cal.get(Calendar.YEAR))));
 	  }
 	}
-      } catch (SecurityException e) {
-	System.err.println("Reading files not allowed.");
       }
 
       // Save to new file
@@ -574,18 +550,6 @@ public class RegattaIO {
 
     return true;
   }
-
-  /**
-   * Convenience method for actual file writer which ignores the RP
-   * database directory (sends <code>null</code>)
-   *
-   * @param reg a <code>Regatta</code> value
-   * @param file a <code>File</code> value
-   * @return a <code>boolean</code> value
-   */
-  public boolean writeFile(Regatta reg, File file) {
-    return this.writeFile(reg, file, null);
-  }
   
   /**
    * Writes the regatta and the RP database to a new file.
@@ -596,7 +560,7 @@ public class RegattaIO {
    * saved.
    * @return <code>true</code> upon success.
    */
-  public boolean writeFile(Regatta reg, File file, File databaseDir) {
+  public boolean writeFile(Regatta reg, File file) {
     this.setRegatta(reg);
     try {
 
@@ -807,43 +771,27 @@ public class RegattaIO {
 
       // RP Database
       root.add(tag = new XMLTag("Membership"));
+      MembershipDatabase db = regatta.getRP().getDatabase();
       XMLTag memtag, name, year;
-      try {
-	for (File affFile : databaseDir.listFiles()) {
-	  tag.add(subtag = new XMLTag("Affiliate"));
-	  subtag.addAttr("id", affFile.getName());
-	  try {
-	    BufferedReader reader =
-	      new BufferedReader(new FileReader(affFile));
-	    String line;
-	    while ((line = reader.readLine()) != null) {
-	      String [] fields = line.split("\t");
-	      try {
-		boolean isNew = Boolean.parseBoolean(fields[3]);
-		if (isNew) {
-		  subtag.add(memtag = new XMLTag("Member"));
-		  memtag.addAttr("id", fields[0]);
-		  memtag.addAttr("data", "TechScore v" + TScoreGUI.VERSION);
-		  memtag.add(name = new XMLTag("Name"));
-		  memtag.add(year = new XMLTag("Year"));
-		  name.add(new XMLTextTag(fields[1]));
-		  year.add(new XMLTextTag(fields[2]));
-		}
-	      } catch (Exception e) {
-		System.err.println("Error in format for sailor, ignoring: " + line);
-	      }
+      for (String aff : db.getAffiliations()) {
+	tag.add(subtag = new XMLTag("Affiliate"));
+	subtag.addAttr("id", aff);
+	for (Membership member : db.getMembers(aff)) {
+	  if (member.isNew()) {
+	    subtag.add(memtag = new XMLTag("Member"));
+	    memtag.addAttr("id", member.getID());
+	    memtag.addAttr("data", "TechScore v" + TScoreGUI.VERSION);
+	    memtag.addAttr("editable", String.valueOf(member.isNew()));
+	    memtag.add(name = new XMLTag("Name"));
+	    name.add(new XMLTextTag(member.getName()));
+
+	    if (member.getYear() != null) {
+	      cal.setTime(member.getYear());
+	      memtag.add(year = new XMLTag("Year"));
+	      year.add(new XMLTextTag(String.valueOf(cal.get(Calendar.YEAR))));
 	    }
-
-	  } catch (IOException e) {
-	    System.err.println("Unable to read database file: " + affFile);
-
 	  }
 	}
-      } catch (SecurityException e) {
-	System.err.print("Error while reading membership database: ");
-	e.printStackTrace(System.err);
-      } catch (NullPointerException e) {
-	// There is no membership database file. Ignore.
       }
 
       // Actually write the file
@@ -884,7 +832,7 @@ public class RegattaIO {
    * @return <code>true</code> on success.
    * @see    #getRegatta
    */
-  public boolean readFile(File f, File databaseDir)
+  public boolean readFile(File f)
     throws IllegalArgumentException {
     
     errors   = new LinkedHashSet<String>();
@@ -1323,76 +1271,57 @@ public class RegattaIO {
 	}
       }
 
-
+      RP rp = new RP();
+      regatta.setRP(rp);
       // RP Database
       // Ensure global sailor ID uniqueness, and keep for quick
       // dereferencing when loading RPs
       Map<String, Sailor> ids = new HashMap<String, Sailor>();
+      MembershipDatabase rpDb = rp.getDatabase();
       int highest_id = 0;
-      if (databaseDir != null) {
-	this.notifyListeners(prop, "Creating RP database");
-	try {
-	  // MISC file
-	  FileWriter fw = new FileWriter(new File(databaseDir, "_MISC"));;
-	  BufferedWriter out = new BufferedWriter(fw);
-	  out.write("");
-	  out.close();
 
-	  // Other affiliations, as found in the Membership tag
-	  Element memElem = getElement(root, "Membership");
-	  if (memElem != null) {
-	    String format = "%s\t%s\t%s\t%s";
-	    nl = memElem.getElementsByTagName("Affiliate");
-	    for (int i = 0; i < nl.getLength(); i++) {
-	      Element e = (Element)nl.item(i);
-	      String id = e.getAttribute("id").trim();
+      this.notifyListeners(prop, "Creating RP database");
+      Element memElem = getElement(root, "Membership");
+      
+      if (memElem != null) {
+	nl = memElem.getElementsByTagName("Affiliate");
+	for (int i = 0; i < nl.getLength(); i++) {
+	  Element e = (Element)nl.item(i);
+	  String id = e.getAttribute("id").trim();
+	  if (id.length() == 0)
+	    id = "_MISC";
+	  rpDb.addAffiliation(id);
+	  
+	  snl = e.getElementsByTagName("Member");
+	  for (int j = 0; j < snl.getLength(); j++) {
+	    Element subE = (Element)snl.item(j);
+	    String sID = subE.getAttribute("id").trim();
+	    String edt = subE.getAttribute("editable").trim();
+	    String nam = getTagContent(subE, "Name");
+	    String yer = getTagContent(subE, "Year");
+	    boolean editable = Boolean.parseBoolean(edt);
+	    cal = Calendar.getInstance();
+	    Date year;
+	    try {
+	      cal.set(Calendar.YEAR, Integer.parseInt(yer));
+	    } catch (NullPointerException ex) {}
+	    catch (NumberFormatException ex) {
+	      warnings.add("Invalid number value for sailor year.");
+	    }
+	    year = cal.getTime();
 
-	      if (id.length() > 0) {
-		fw = new FileWriter(new File(databaseDir, id));
-		out = new BufferedWriter(fw);
-		out.write("");
-		snl = e.getElementsByTagName("Member");
-		for (int j = 0; j < snl.getLength(); j++) {
-		  Element subE = (Element)snl.item(j);
-		  String sID = subE.getAttribute("id").trim();
-		  String nam = getTagContent(subE, "Name");
-		  String yer = getTagContent(subE, "Year");
-		  cal = Calendar.getInstance();
-		  Date year;
-		  try {
-		    cal.set(Calendar.YEAR, Integer.parseInt(yer));
-		  } catch (NullPointerException ex) {
-		    warnings.add("Missing year, using current.");
-		  } catch (NumberFormatException ex) {
-		    warnings.add("Invalid number value for sailor year.");
-		  }
-		  year = cal.getTime();
-
-		  if (sID.length() > 0 && (!ids.containsKey(sID)) && nam != null) {
-		    out.write(String.format(format, sID, nam, yer, "false"));
-		    out.newLine();
-		    ids.put(sID, new Sailor(sID, nam, year));
-		    if (sID.matches(Factory.RP_PREFIX + "[0-9]+")) {
-		      highest_id = Integer.parseInt(sID.substring(Factory.RP_PREFIX.length()));
-		      Factory.setLastRpId(highest_id);
-		    }
-		  }
-		  else {
-		    warnings.add("Invalid sailor information in membership file.");
-		  }
-		}
-		out.close();
+	    if (sID.length() > 0 && (!ids.containsKey(sID)) && nam != null) {
+	      rpDb.setMember(id, new Membership(sID, nam, year, editable));
+	      ids.put(sID, new Sailor(sID, nam, year));
+	      if (sID.matches(Factory.RP_PREFIX + "[0-9]+")) {
+		highest_id = Integer.parseInt(sID.substring(Factory.RP_PREFIX.length()));
+		Factory.setLastRpId(highest_id);
 	      }
 	    }
+	    else {
+	      warnings.add("Invalid sailor information in membership file.");
+	    }
 	  }
-	} catch (IllegalArgumentException e) {
-	  warnings.add(e.getMessage());
-	} catch (IOException e) {
-	  e.printStackTrace();
-	  warnings.add("Unable to create temp dir: " + e.getMessage());
-	} catch (SecurityException e) {
-	  warnings.add("Do not have priviledges to create directory: " +
-		       e.getMessage());
 	}
       }
 
@@ -1401,8 +1330,6 @@ public class RegattaIO {
       nl = root.getElementsByTagName("RP");
       len = nl.getLength();
       if (len > 0) {
-	RP rp = new RP();
-	regatta.setRP(rp);
 	Element rotElem = (Element)nl.item(len - 1);
 	snl = rotElem.getElementsByTagName("Sailor");
 	Sailor sailor;
@@ -1709,10 +1636,11 @@ public class RegattaIO {
   }
 
   public static void main (String [] args) {
+
     RegattaIO io = new RegattaIO();
     for (String filename : args) {
       try {
-	boolean success = io.readFile(new File(filename), null);
+	boolean success = io.readFile(new File(filename));
 	if (success) {
 	  System.out.println("Success with no problems.");
 	}
@@ -1721,6 +1649,10 @@ public class RegattaIO {
 	    System.out.println(mes);
 	    
 	}
+
+	System.in.read();
+	System.exit(0);
+
 	Regatta reg = io.getRegatta();
 	Team [] teams = reg.getTeams();
 	teams[0].setLongname("PPP");
@@ -1759,7 +1691,10 @@ public class RegattaIO {
 	
       } catch (IllegalArgumentException e) {
 	System.out.println("Unable to read file: " + e.getMessage());
+      } catch (IOException e) {
+	System.err.println("Unable to read from command line.");
       }
+
     }
   }
 }

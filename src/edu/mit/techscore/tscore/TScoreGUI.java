@@ -112,9 +112,6 @@ public class TScoreGUI
   private QuitAction quAction;
   private ToggleDialogAction sRotAction, sScoreAction, sHelpAction;
 
-  // Temporary directory
-  private File databaseDir;
-
   // Preferences
   private Scorer scorer;
 
@@ -137,21 +134,6 @@ public class TScoreGUI
     this.fc.setFileFilter(fileFilter);
     // this.fc.addChoosableFileFilter(new NavyFileFilter());
     this.setIconImage(new ImageIcon(getClass().getResource("img/icon.png")).getImage());
-
-    // Create temporary directory
-    try {
-      File dir = File.createTempFile("tsr", "");
-      this.databaseDir = new File(dir.getPath());
-      dir.delete();
-      if (!this.databaseDir.mkdir()) {
-	System.err.println("Could not create RP database directory.");
-	this.databaseDir = null;
-      }
-    }
-    catch (IOException e) {
-      System.err.println("Could not create RP database: " + e.getMessage());
-      this.databaseDir = null;
-    }
 
     // INIT COMPONENTS
 
@@ -205,9 +187,7 @@ public class TScoreGUI
     menu.setMnemonic(KeyEvent.VK_E);
     mb.add(menu);
     RPFormPane rpPane = new RPFormPane(this.regatta);
-    rpPane.setDatabaseDir(this.databaseDir);
     RPDatabasePane dbPane = new RPDatabasePane(this.regatta);
-    dbPane.setDatabaseDir(this.databaseDir);
 
     editPanes = new AbstractPane [] {new DetailsPane(this.regatta),
 				     new DailySummaryPane(this.regatta),
@@ -328,7 +308,7 @@ public class TScoreGUI
     final Runnable thd = new Runnable() {
 	public void run() {
 	  try {
-	    boolean success = regIO.readFile(f, databaseDir);
+	    boolean success = regIO.readFile(f);
 
 	    // Save open regatta?
 	    if (TScoreGUI.this.regatta != null) {
@@ -550,7 +530,7 @@ public class TScoreGUI
 	}
 
 	if (regattaFile == null) {
-	  if (regIO.writeFile(regatta, f, databaseDir)) {
+	  if (regIO.writeFile(regatta, f)) {
 	    TScoreGUI.this.regattaFile = f;
 	    TScoreGUI.this.hasUnsaved = false;
 	    TScoreGUI.this.srAction.setEnabled(false);
@@ -566,7 +546,7 @@ public class TScoreGUI
 	}
 	else {
 	  // Rewrite
-	  if (regIO.rewriteFile(regatta, regattaFile, f, databaseDir)) {
+	  if (regIO.rewriteFile(regatta, regattaFile, f)) {
 	    TScoreGUI.this.regattaFile = f;
 	    TScoreGUI.this.hasUnsaved = false;
 	    TScoreGUI.this.srAction.setEnabled(false);
@@ -614,8 +594,7 @@ public class TScoreGUI
 	regIO.setRegatta(regatta);
 	if (regIO.rewriteFile(regatta,
 			      TScoreGUI.this.regattaFile,
-			      TScoreGUI.this.regattaFile,
-			      TScoreGUI.this.databaseDir)) {
+			      TScoreGUI.this.regattaFile)) {
 	  TScoreGUI.this.hasUnsaved = false;
 	  this.setEnabled(false);
 	  TScoreGUI.this.updateTitle();
@@ -749,16 +728,6 @@ public class TScoreGUI
       // Ask the windows to save preferences, too
       TScoreGUI.this.sRotAction.savePreferences();
       TScoreGUI.this.sScoreAction.savePreferences();
-
-      // Delete temporary directory and contents
-      try {
-	for (File f : databaseDir.listFiles()) {
-	  f.delete();
-	}
-	databaseDir.delete();
-      } catch (SecurityException e) {
-	System.err.println("Unable to delete files: " + e.getMessage());
-      }
 
       // Exit
       System.exit(0);

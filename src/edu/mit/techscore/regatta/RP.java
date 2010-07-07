@@ -20,8 +20,11 @@ import java.util.LinkedHashSet;
  * applicable), and the races sailed. Note that no guarantee is made
  * that the team and races held by this RP belong to the same
  * regatta. RP Forms must be registered with a regatta object by
- * calling the <code>setRP</code> method in Regatta.
+ * calling the <code>setRP</code> method in Regatta.</p>
  *
+ * RP membership information is handled by the
+ * {@link MembershipDatabase} object. Every RP creates its own
+ * database, but one can also be assigned.<p>
  *
  * Created: Thu Aug  6 09:58:31 2009
  *
@@ -52,13 +55,37 @@ public class RP {
   private Map<Team, TreeMap<Race, Boat>> partMap;
 
   /**
+   * The database where sailor membership is pulled from.
+   */
+  private MembershipDatabase database;
+
+  /**
    * Creates a new <code>RP</code> instance.
    *
    */
   public RP() {
     this.partMap = new HashMap<Team, TreeMap<Race, Boat>>();
+    this.database = new MembershipDatabase();
   }
 
+  /**
+   * Get the <code>Database</code> value.
+   *
+   * @return a <code>MembershipDatabase</code> value
+   */
+  public final MembershipDatabase getDatabase() {
+    return database;
+  }
+
+  /**
+   * Set the <code>Database</code> value.
+   *
+   * @param newDatabase The new Database value.
+   */
+  public final void setDatabase(final MembershipDatabase newDatabase) {
+    this.database = newDatabase;
+  }
+  
   /**
    * Resets the RP information for the given team, regardless of
    * whether the team exists or not.

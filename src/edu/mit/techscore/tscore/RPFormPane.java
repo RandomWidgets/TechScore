@@ -1,47 +1,53 @@
 package edu.mit.techscore.tscore;
 
-import edu.mit.techscore.regatta.Regatta;
-import edu.mit.techscore.regatta.RegattaEvent;
-import java.awt.event.ActionListener;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import java.awt.event.ActionEvent;
-import javax.swing.JScrollPane;
-import javax.swing.JComponent;
-import edu.mit.techscore.regatta.Team;
-import javax.swing.JButton;
-import javax.swing.AbstractAction;
-import javax.swing.JPanel;
-import java.awt.GridBagLayout;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.GridBagConstraints;
-import edu.mit.techscore.regatta.Regatta.Division;
-import javax.swing.JTextField;
-import javax.swing.JSpinner;
+import java.awt.GridBagLayout;
 import java.awt.Insets;
-import javax.swing.SpinnerDateModel;
-import java.util.Date;
-import java.util.Calendar;
-import javax.swing.JSpinner.DateEditor;
-import java.util.List;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
+import javax.swing.AbstractAction;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListModel;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSpinner;
+import javax.swing.JSpinner.DateEditor;
+import javax.swing.JTabbedPane;
+import javax.swing.JTextField;
+import javax.swing.SpinnerDateModel;
+
 import edu.mit.techscore.regatta.RP;
 import edu.mit.techscore.regatta.RP.BoatRole;
-import edu.mit.techscore.regatta.Sailor;
 import edu.mit.techscore.regatta.Race;
-import javax.swing.JOptionPane;
+import edu.mit.techscore.regatta.Regatta;
+import edu.mit.techscore.regatta.Regatta.Division;
+import edu.mit.techscore.regatta.RegattaEvent;
 import edu.mit.techscore.regatta.RegattaEvent.RegattaEventType;
-import javax.swing.JTabbedPane;
-import java.awt.BorderLayout;
-import java.io.File;
-import javax.swing.DefaultComboBoxModel;
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.FileNotFoundException;
-import java.awt.Dimension;
-import java.io.FileWriter;
-import java.io.BufferedWriter;
-import javax.swing.DefaultListModel;
+import edu.mit.techscore.regatta.Sailor;
+import edu.mit.techscore.regatta.Team;
+import edu.mit.techscore.regatta.MembershipDatabase;
+import edu.mit.techscore.regatta.MembershipDatabase.Membership;
+import java.util.Arrays;
+import java.util.regex.Pattern;
+// import edu.mit.techscore.tscore.RPFormPane.RPRow;
 
 /**
  * Pane for adding/editing record of participation. Use the sailor
@@ -78,7 +84,6 @@ public class RPFormPane
   private AbstractAction enterAction, removeAction;
 
   // Database
-  private File databaseDir;
   private Sailor  [] currentSailors;
 
   private static final Sailor NO_SAILOR = new Sailor("", "", null);
@@ -90,39 +95,22 @@ public class RPFormPane
   public RPFormPane(Regatta reg) {
     super("RP Forms");
     setRegatta(reg);
-    this.databaseDir = null;
-  }
-
-  public void setDatabaseDir(File dir) {
-    if (!dir.isDirectory()) {
-      throw new IllegalArgumentException(dir + " not a directory.");
-    }
-    this.databaseDir = dir;
-  }
-
-  public File getDatabaseDir() {
-    return this.databaseDir;
   }
 
   public Team [] getTeamsInDatabase() {
-    List<String> validAff = new ArrayList<String>();
-    try {
-      for (File affFile : databaseDir.listFiles()) {
-	if (affFile.length() > 1L) {
-	  validAff.add(affFile.getName());
-	}
+    RP rp = this.regatta.getRP();
+    if (rp == null) return new Team[]{};
+    
+    MembershipDatabase db = this.regatta.getRP().getDatabase();
+    
+    List<String> validAffs  = Arrays.asList(db.getAffiliations());
+    List<Team>   validTeams = new ArrayList<Team>();
+    for (Team team : regatta.getTeams()) {
+      if (validAffs.contains(team.getAffiliation())) {
+	validTeams.add(team);
       }
-      List<Team> validTeams = new ArrayList<Team>();
-      for (Team team : regatta.getTeams()) {
-	if (validAff.contains(team.getAffiliation())) {
-	  validTeams.add(team);
-	}
-      }
-      return validTeams.toArray(new Team[]{});
-    } catch (SecurityException e) {
-      System.err.println("Unable to read from database.");
     }
-    return new Team []{};
+    return validTeams.toArray(new Team[]{});
   }
 
   public void fill() {
@@ -170,7 +158,7 @@ public class RPFormPane
     this.add(button, c1);
 
     //- "Add" button
-    this.add(new JButton(new AbstractAction("Add/Update") {
+    this.enterAction = new AbstractAction("Add/Update") {
 	public void actionPerformed(ActionEvent evt) {
 	  Team team = (Team)RPFormPane.this.teamCombo.getSelectedItem();
 	  RP rp = RPFormPane.this.regatta.getRP();
@@ -201,7 +189,8 @@ public class RPFormPane
 						     this));
 	  RPFormPane.this.updateForm();
 	}
-      }), c2);
+      };
+    this.add(new JButton(this.enterAction), c2);
 
     // Setup the form
     for (Division div : this.regatta.getDivisions()) {
@@ -243,32 +232,10 @@ public class RPFormPane
    * entry.
    */
   private void fillSailors() {
-    List<Sailor> sailors = new ArrayList<Sailor>();
-    Calendar cal;
     Team team = (Team)teamCombo.getSelectedItem();
-    File file = new File(this.databaseDir, team.getAffiliation());
-    try {
-      BufferedReader reader =
-	new BufferedReader(new FileReader(file));
-      String line;
-      while ((line = reader.readLine()) != null) {
-	String [] fields = line.split("\t");
-	String id   = fields[0].trim();
-	String name = fields[1].trim();
-	cal = Calendar.getInstance();
-	try {
-	  cal.set(Calendar.YEAR, Integer.valueOf(fields[2]));
-	} catch (NumberFormatException e) {}
-	sailors.add(new Sailor(id, name, cal.getTime()));
-      }
-
-    } catch (FileNotFoundException e) {
-      System.err.println("Unknown affiliation file: " + file);
-    } catch (IOException e) {
-      System.err.println("Unable to read database file: " +
-			 file);
-    } 
-    this.currentSailors = sailors.toArray(new Sailor[]{});
+    MembershipDatabase db = this.regatta.getRP().getDatabase();
+    this.currentSailors = db.getMembers(team.getAffiliation());
+    Arrays.sort(this.currentSailors);
   }
 
   // Actions
@@ -307,7 +274,7 @@ public class RPFormPane
    * row and updates the RP object with the data.
    *
    */
-  private class RPRow {
+  private class RPRow implements ActionListener {
     // Private variables
     JComboBox roleCombo;
     JTextField raceField;
@@ -330,13 +297,19 @@ public class RPFormPane
       DefaultComboBoxModel lm = new DefaultComboBoxModel(currentSailors);
       lm.insertElementAt(NO_SAILOR, 0);
       nameField = new JComboBox(lm);
-      nameField.setRenderer(new SailorNameCellRenderer());
+      // nameField.setRenderer(new SailorNameCellRenderer());
       nameField.setSelectedItem(NO_SAILOR);
+      nameField.setEditable(true);
+      nameField.addActionListener(this);
 
       // Race field
       raceField =
 	new JRangeTextField(Factory.raceToInteger(regatta.getRaces(Division.A)));
       raceField.setPreferredSize(new Dimension(30,10));
+    }
+
+    void addSailor(Sailor sailor) {
+      this.nameField.addItem(sailor);
     }
     
     JComponent [] getComponentArray() {
@@ -356,6 +329,8 @@ public class RPFormPane
      * @return <code>null</code> if incomplete name
      */
     Sailor getSailor() {
+      System.out.println(this.nameField.getSelectedItem().getClass() + ": " + this.nameField.getSelectedItem());
+      
       Sailor s = (Sailor)this.nameField.getSelectedItem();
       return (s == NO_SAILOR) ? null : s;
     }
@@ -385,6 +360,52 @@ public class RPFormPane
      */
     BoatRole getRole() {
       return (BoatRole)this.roleCombo.getSelectedItem();
+    }
+
+    /**
+     * Adds a new sailor in the nameField combo box
+     *
+     */
+    public void actionPerformed(ActionEvent evt) {
+      Object cur = this.nameField.getSelectedItem();
+      if (evt.getActionCommand().equals("comboBoxChanged") && cur instanceof String) {
+	String obj = (String)cur;
+	obj.trim();
+
+	Calendar cal = Calendar.getInstance();
+	String name;
+	Date year;
+	// Determine if there is a year
+	if (Pattern.matches("^.* [0-9]{4}$", obj)) {
+	  name = obj.substring(0, obj.length() - 5);
+	  cal.set(Calendar.YEAR, Integer.parseInt(obj.substring(obj.length() - 4)));
+	  year = cal.getTime();
+	}
+	else if (Pattern.matches("^.* '[0-9]{2}$", obj)) {
+	  name = obj.substring(0, obj.length() - 4);
+	  int full = cal.get(Calendar.YEAR);
+	  cal.set(Calendar.YEAR,
+		  full - (full % 100) +
+		  Integer.parseInt(obj.substring(obj.length() - 2)));
+	  year = cal.getTime();
+	}
+	else {
+	  // Assume current year
+	  name = obj;
+	  year = cal.getTime();
+	}
+	Membership sailor = new Membership(Factory.getNextRpId(), name, year);
+	Team team = (Team)teamCombo.getSelectedItem();
+	regatta.getRP().getDatabase().setMember(team.getAffiliation(), sailor);
+
+	// Add sailor to all rows
+	RPRow [] rpRows = ((RPDivisionForm)form.getSelectedComponent()).getRows();
+	for (RPRow row : rpRows) {
+	  row.addSailor(sailor);
+	}
+	this.nameField.removeItem(obj);
+	this.nameField.setSelectedItem(sailor);
+      }
     }
   }
 

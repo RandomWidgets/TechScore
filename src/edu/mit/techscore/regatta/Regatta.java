@@ -105,7 +105,7 @@ public class Regatta {
     numRaces     = 0;
 
     this.blurbs = new TreeMap<Date, String>();
-    myCal = Calendar.getInstance();;
+    myCal = Calendar.getInstance();
   }
 
   // Regatta fields

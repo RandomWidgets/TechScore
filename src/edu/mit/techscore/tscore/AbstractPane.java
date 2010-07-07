@@ -132,7 +132,7 @@ public abstract class AbstractPane
    *
    * @param newRegatta The new Regatta value.
    */
-  public final void setRegatta(final Regatta newRegatta) {
+  public void setRegatta(final Regatta newRegatta) {
     this.regatta = newRegatta;
     if (this.regatta == null) {
       this.setEnabled(false);
