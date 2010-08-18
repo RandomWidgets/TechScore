@@ -1,0 +1,117 @@
+<html>
+  <h1>Setting up rotations</h1>
+  <p><big>Optionally setup and remove rotations to be used throughout
+  the regatta.</big></p>
+  <h2>Introduction</h2>
+  <p>Rotations can be used to enter finishes by using the sail numbers
+  instead of the actual team names. They can be very complex in order
+  to promote fairness. Each team is assigned a boat from a fixed set
+  for each race in each division. If the scoring is combined, each
+  team in each division will receive a unique boat in each race. This
+  pane provides a number of parameters you can tweak to create
+  virtually any rotation desired.</p>
+  <h2>Parameters</h2>
+  <p>Typically, rotations are created for sets of races at a time.
+  With the parameters below, it is possible to create an entire
+  rotation with just a few clicks, as TechScore takes care of
+  shuffling the sail numbers for each race.</p>
+  <h3>Rotation <em>Type</em></h3>
+  <p>As a team's assigned sail shifts from one race to another, there
+  are three ways to determine the next sail:</p>
+  <ul>
+    <li>Standard (+1) assigns the next available sail from the
+    set. If sails are numbered sequentially, this results in a team
+    always moving to the boat with its current sail number plus
+    1. When the last sail is reached, the next sail becomes the first
+    in the list.</li>
+    <li>Direct swap either moves the team into the next sail from the
+    set or the previous one in such a way that every other team shifts
+    in the same direction. <b>Direct swap requires an even number of
+    teams in each race.</b></li>
+    <li>With no rotation, each team sails the same boat in each
+    race.</li>
+  </ul>
+  <p>The shift from one sail to another happens after each race, with
+  divisions kept separately in the process, but this can be controlled
+  with the <em>Style</em> parameter.</p>
+  <h3>Rotation <em>Style</em></h3>
+  <p>When creating rotations for more than one division at a time (the
+  standard procedure), it is customary to apply the rules of the
+  rotation, as described above, for the same race number across all
+  the divisions at a time. With the <em>Style</em> you can control at
+  what point does the shift prescribed in the <em>Type</em> occur:</p>
+  <ul>
+    <li>With <em>Same for all divisions</em>, the shift happens after
+    all the sails have been assigned for the same race number across
+    all divisions. This style results in all divisions having the
+    same rotation.</li>
+    <li>With <em>Rotate sail at division switch</em>, the shift
+    prescribed in the rotation type happens after every race,
+    regardless of division. In college sailing, this is often
+    referred to as <em>Navy special</em>.</li>
+    <li>With <em>Start sails offset between divisions</em>, known
+    colloquially as the Franny special, the chosen rotation type is
+    applied to the first chosen division. After that, the same
+    rotation type is copied over each other division in turn, with the
+    starting sails shifted by the offset amount.</li>
+  </ul>
+  <h3>Races in set</h3>
+  <p>It is often inconvenient to rotate after every race. This
+  parameter allows you specifiy the number of races per set before
+  rotating.  Thus, a value of <em>2</em> means that each team sails in
+  the same sail for two races at a time before rotating according to
+  the <em>type</em> and <em>style</em>.</p>
+  <h3>(Offset) Amount</h3>
+  <p>This option is only available if using the offset
+  rotation <em>style</em> as discussed above. In that case, the
+  amount to offset can be specified here. Note that the same offset
+  will be applied to each division in turn. Thus, if there are
+  divisions and the offset is 6, then the Division B's rotation will
+  be offset 6 sails from Division A, while Division C's will be
+  offset 12 from A.</p>
+  <h3>Races</h3>
+  <p>It is customary to apply the same rotation to the entire
+  regatta. For convenience, you can specify a subset of races for
+  which to apply the rotation style. This gives you the flexibility
+  to apply a completely unique rotation style as you can tweak the
+  races to be any set of race numbers, separated by commas. Ranges
+  can be specified by using dashes, as shown.</p>
+  <h3>Division order</h3>
+  <p>While most rotations are applied to each division in alphabetical
+  order, some race committees prefer to start rotations with a
+  different division so as to end the regatta with the toughest
+  division sailing last.</p>
+  <p>To specify a different division order, drag the divisions around
+  until the sequence reflects the desired order. This is particularly
+  useful if using the second or third rotation style, as the first
+  produces the same rotation for each division anyways, as discussed
+  above under <em>Same for all divisions</em>.</p>
+  <h3>Sort sails first</h3>
+  <p>As of version 1.4, sails no longer have to be numbers, they can
+  also include letters. Usually, however, the boats are arranged in
+  order prior to creating the rotation. TechScore will attempt to
+  order the sail values by their natural order, but if no ordering is
+  required, the option is provided as well. This parameter tells
+  TechScore to possibly sort the starting sails in the first race, so
+  that if numbers are used, for example, the shift from one race to
+  another is more logical.</p>
+  <h2>Starting sails</h2>
+  <p>Specify the sails to be used in the lower portion of the pane
+  titled <em>Starting sails</em>. Each team in the regatta is printed
+  with a textbox next to it. You may choose the next available sail by
+  pressing the scroll buttons next to each textbox, or type your
+  own. Note that you will not be allowed to click on <em>Set
+  rotation</em> at the bottom-right of the screen if there are
+  duplicate or missing sail numbers.</p>
+  <p>Note also that these are the sail numbers in the first race in
+  the first division (as specified by the division order).</p>
+  <p>Finally, <strong>remember to click <em>Set rotation</em></strong>
+  in the lower right corner to actually create the rotation! When you
+  do, the Rotations dialog will open if not already open so that you
+  can admire your work.</p>
+  <h2>Removing a rotation</h2>
+  <p>To remove a rotation, click on the <em>Delete</em> button in the
+  lower left corner. You will be prompted to confirm if finished have
+  been entered. Removing a rotation <b>does NOT affect the
+  scores.</b></p>
+</html>

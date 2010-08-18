@@ -31,7 +31,8 @@ import javax.swing.JEditorPane;
 import javax.swing.JScrollPane;
 
 /**
- * Describe class IntroductionDialog here.
+ * Contextual help dialog. Offers instruction to the user based on
+ * where they are in the program.
  *
  *
  * Created: Sat Jun 12 14:26:09 2010
@@ -69,6 +70,7 @@ public class IntroductionDialog extends AbstractFrame implements PaneChangeListe
   public void update() {}
   public void fill() {
     this.content.setText(this.text);
+    this.content.setCaretPosition(0);
   }
 
   /**
