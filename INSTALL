@@ -1,9 +1,9 @@
 * Installing TechScore
 
-To install, run `make' to compile the source code. Once finished, you
-can create an executable *.jar file by running `make jar'.
+To install, run `ant' to compile the source code. Once finished, you
+can create an executable *.jar file by running `ant dist'.
 
-     ** NOTE: TechScore is developed using `javac 1.5.0_16' **
+ ** NOTE: TechScore is developed using at least`javac 1.5.0_16' **
 
 Enjoy!
 
