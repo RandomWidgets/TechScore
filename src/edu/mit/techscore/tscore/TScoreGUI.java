@@ -81,7 +81,7 @@ public class TScoreGUI
   implements RegattaListener, WindowListener, PropertyChangeListener {
   
   // Static variables
-  public static String VERSION = "1.4";
+  public static String VERSION = "1.5";
   public static String FILE_EXTENSION = "tsr";
   public static String NAVY_EXTENSION = "sco";
 
