@@ -26,9 +26,7 @@ public class XMLTextTag extends XMLTag {
     this.text = t;
   }
 
-  public String toXMLString(int ind) {
-    String rep = String.format("%" + ind + "s", " ");
-    rep += this.text + "\n";
-    return rep;
+  public String toXMLString() {
+    return this.text;
   }
 }

@@ -771,7 +771,7 @@ public class RegattaIO {
 
       // RP Database
       root.add(tag = new XMLTag("Membership"));
-      MembershipDatabase db = regatta.getRP().getDatabase();
+      MembershipDatabase db = this.regatta.getRP().getDatabase();
       XMLTag memtag, name, year;
       for (String aff : db.getAffiliations()) {
 	tag.add(subtag = new XMLTag("Affiliate"));

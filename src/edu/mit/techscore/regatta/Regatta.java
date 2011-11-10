@@ -100,6 +100,7 @@ public class Regatta {
     this.setScoring(RegattaScoring.STANDARD);
     this.teamPenaltyMap =
       new TreeMap<Division, Map<Team, TeamPenalty>>();
+    this.rp = new RP();
 
     numDivisions = 0;
     numRaces     = 0;

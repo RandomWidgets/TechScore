@@ -81,7 +81,7 @@ public class TScoreGUI
   implements RegattaListener, WindowListener, PropertyChangeListener {
   
   // Static variables
-  public static String VERSION = "1.5";
+  public static String VERSION = "1.5.1";
   public static String FILE_EXTENSION = "tsr";
   public static String NAVY_EXTENSION = "sco";
 
@@ -529,7 +529,7 @@ public class TScoreGUI
 	  f = new File(f.getPath() + "." + TScoreGUI.FILE_EXTENSION);
 	}
 
-	if (regattaFile == null) {
+	if (TScoreGUI.this.regattaFile == null) {
 	  if (regIO.writeFile(regatta, f)) {
 	    TScoreGUI.this.regattaFile = f;
 	    TScoreGUI.this.hasUnsaved = false;
