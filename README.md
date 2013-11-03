@@ -1,4 +1,4 @@
-#TechScore: Java Regatta Scoring Program
+#TechScore: Java Regatta Scoring Program [![Build Status](https://travis-ci.org/RandomWidgets/TechScore.png?branch=master)](https://travis-ci.org/RandomWidgets/TechScore)
 
 ###This is the Random Widgets Fork of TechScore. The original version is available at: [Sourceforge](http://techscore.sourceforge.net), created by Dayan Paez.
 ---
