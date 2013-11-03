@@ -1,6 +1,6 @@
 language: java
 
-script: ant dist
+script: ant compile
 
 jdk:
   - oraclejdk7

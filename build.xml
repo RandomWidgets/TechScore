@@ -8,9 +8,13 @@
   <property name="doc"     location="doc"/>
   <property name="build"   location="bin"/>
   <property name="src"     location="src"/>
+  
 
   <!-- Source file for RESources -->
   <property name="res"     location="res"/>
+  
+  
+  
   
   <!-- default -->
   <target name="compile" description="compile the source " >
@@ -30,6 +34,15 @@
 	<attribute name="Main-Class" value="edu.mit.techscore.tscore.TScoreGUI" />
       </manifest>
     </jar>
+  </target>
+  
+  <!-- running -->
+ <target name="run" depends="dist" description="generate and run the distribution">
+    <java fork="true" jar="tscore-${version}.jar">
+      <classpath>
+        <path location="${build}/tscore-${version}.jar"/>
+      </classpath>
+    </java>
   </target>
 
   <!-- documentation -->
