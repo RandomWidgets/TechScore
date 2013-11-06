@@ -9,9 +9,8 @@ TechScore is FREE software licensed under the GPL license. TechScore is a cross-
 #### What's Different About This Fork?
 As a scorer in the ISSA SAISA district, we wish to improve TechScore. As nothing much has happened to the TechScore SoureForge Repository, we have "forked" it and will be working on new features and bug fixes here 
 
-#### Other Less Important Stuff:
 
-##### License:
+#### License:
 TechScore is free software: you can redistribute it and/or modify it
 under the terms of the GNU General Public License as published by the
 Free Software Foundation, either version 3 of the License, or (at your
@@ -24,16 +23,4 @@ General Public License for more details.
 
 You should have received a copy of the GNU General Public License
 along with TechScore.  If not, see <http://www.gnu.org/licenses/>.
-
-##### Structure of Source:
-The program consists of four packages:
-
-| Dir.    | Description                                  |
-|---------|----------------------------------------------|
-| dpxml   | XML Library                                  |
-| regatta | Library of sailing regatta tools             |
-| tscore  | The MAIN package with all the GUI tools      |
-| nscore  | A set of compatibility tools for NavyScoring |
-
-The main executable is TScoreGUI.java, found in the folder "tscore".
 
